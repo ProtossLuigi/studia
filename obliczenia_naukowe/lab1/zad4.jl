@@ -1,3 +1,4 @@
+#Kajetan Bilski
 
 function find_min()
     x = nextfloat(1e0)

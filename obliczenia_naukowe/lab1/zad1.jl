@@ -1,3 +1,4 @@
+#Kajetan Bilski
 macheps = Float16(1.)
 while Float16(1.) + macheps / 2 > Float16(1.)
 	global macheps /= 2
