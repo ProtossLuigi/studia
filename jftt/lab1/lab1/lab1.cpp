@@ -91,8 +91,8 @@ vector<int> automat(string text, string pattern)
 
 int main(int argc, char** argv)
 {
-	bool mode;
-	if (strcmp(argv[1], "-kmp"))
+	bool mode = 0;
+	if (argc > 1 && strcmp(argv[1], "-kmp") == 0)
 	{
 		mode = 1;
 	}
