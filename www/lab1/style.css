@@ -45,6 +45,11 @@ aside {
 
 article {
     width: 100%;
+    padding: 18px;
+}
+
+.info_table {
+    border-spacing: 8px;
 }
 
 img {
