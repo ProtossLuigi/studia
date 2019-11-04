@@ -8,6 +8,7 @@ body {
     color: red;
     max-width: 1024px;
     margin: auto;
+    min-height: 100vh;
 }
 
 nav {
@@ -43,31 +44,58 @@ aside {
     width: 100%;
 }
 
-article {
-    width: 100%;
+aside > img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.personal_info {
+    width: auto;
     padding: 18px;
 }
 
 .info_table {
     border-spacing: 8px;
+    margin: 0 auto;
 }
 
 img {
     object-fit: contain;
 }
 
-@media only screen and (min-width: 600px) {
+.interest > img {
+    max-width: 30%;
+}
+
+@media only screen and (min-width: 800px) {
     nav > ul {
         display: flex;
     }
 
     aside {
-        float: left;
         width: auto;
+        float: left;
     }
 
     article {
-        float: left;
         width: auto;
+    }
+
+    .info_table {
+        float: left;
+    }
+
+    .interest > img {
+        float: left;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    body {
+        border-style: solid;
+        border-color: #1c1c1c;
+        border-bottom: hidden;
+        border-top: hidden;
     }
 }
