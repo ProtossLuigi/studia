@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 	bool mode = 0;
 	if (argc > 1 && strcmp(argv[1], "-kmp") == 0)
 	{
-		mode = 1;
+		mode = 0;
 	}
 	string text, pattern;
 	cout << "text: ";

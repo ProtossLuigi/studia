@@ -64,6 +64,10 @@ img {
     object-fit: contain;
 }
 
+.interest {
+    overflow: auto;
+}
+
 .interest > img {
     max-width: 30%;
     display: block;
@@ -91,6 +95,7 @@ img {
 
     .interest > img {
         float: left;
+
     }
 }
 
