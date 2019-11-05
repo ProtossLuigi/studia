@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,93 @@
         <li><a href="interests.html">zainteresowania</a> </li>
     </ul>
 </nav>
-
+<div class="content">
+    <div class="project">
+        <p><b>Gra 2D (w trakcie produkcji)</b></p>
+        <p><a href="https://github.com/ProtossLuigi/asdf">link do repozytorium</a></p>
+        <p>Prosta gra RPG z turowym systemem walki i generacją proceduralną poziomów (NYI). W ostatecznej wersji gracz przechodzi przez kolejne proceduralnie generowane poziomy, pokonując losowo pojawiające się potwory i znajdując przedmioty. Poziomy nigdy się nie kończą, a potwory stają się coraz mocniejsze wraz z postępem w grze. Co kilka poziomów pojawiają się specjalne bossy. Aplikacja napisana w javie z gradle i libgdx.</p>
+        <div class="code_demo">
+            <code>
+                @Override<br>
+                public void render () {<br>
+                Gdx.gl.glClearColor(0, 0, 0, 1);<br>
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);<br>
+                <br>
+                if(inputReady){<br>
+                inputHandle();<br>
+                movePlayer();<br>
+                camUpdate();<br>
+                }<br>
+                <br>
+                if(enemyApproaching){<br>
+                initCombat();<br>
+                }<br>
+                <br>
+                batch.begin();<br>
+                <br>
+                for(int y=0;y&lt;level.getheight();y++){<br>
+                for(int x=0;x&lt;level.getwidth();x++){<br>
+                batch.draw(findTexture(level.getTile(x,y)), x*tilesize-camx, y*tilesize-camy, tilesize, tilesize);<br>
+                }<br>
+                }<br>
+                <br>
+                batch.draw(findPlayermodel(Direction.RIGHT), player.coordx*tilesize+playerx-camx, player.coordy*tilesize+playery-camy, tilesize, tilesize);<br>
+                <br>
+                drawTextBox();<br>
+                <br>
+                batch.end();<br>
+                }
+            </code>
+        </div>
+    </div>
+    <div class="project">
+        <p><b>Chińskie warcaby (projekt grupowy)</b></p>
+        <p><a href="https://github.com/JacekDuszenko/chinese-checkers">link do repozytorium</a></p>
+        <p>Aplikacja do gry online w chińskie warcaby, czyli warcaby dla więcej niż 2 graczy. Możliwość grania z botami. Serwer i klient napisane w javie. Używany maven, lombok i mockito.</p>
+        <div class="code_demo"><code>
+            private String respondToClient(String line) {<br>
+            StringBuilder responseBuilder = new StringBuilder();<br>
+            List&lt;String> command = commandParser.parseCommand(line);<br>
+            int witch = 0;<br>
+            <br>
+            log.warn("parsed command is: " + command);<br>
+            <br>
+            String order = command.get(0);<br>
+            for (ServerResponseStrategy strat : createStrategies()) {<br>
+            if (strat.isApplicable(order)) {<br>
+            strat.apply(responseBuilder, clientID, port, command, boardID, witch, serverSide, out, line, client);<br>
+            break;<br>
+            }<br>
+            }<br>
+            command.clear();<br>
+            return responseBuilder.toString();<br>
+            }
+        </code></div>
+    </div>
+    <div class="project">
+        <p><b>Symulator strzelania ze snajperki (projekt grupowy)</b></p>
+        <p><a href="https://github.com/JacekDuszenko/Python-Bullet-Shoot-Simulation">link do repozytorium</a></p>
+        <p>Aplikacja symulacji 3D lotu pocisku wystrzelonego z broni palnej. Dostosowywalne m.in. prędkość wiatry, typ broni, odległość od celu. Stworzone w Unity.</p>
+        <div class="code_demo"><code>
+            public static Vector3 CalculateDrag(Vector3 velocityVec)<br>
+            {<br>
+            //F_drag = k * v^2 = m * a<br>
+            //k = 0.5 * C_d * rho * A<br>
+            <br>
+            float m = 2f; // kg<br>
+            float k = 0.5f * C_d * rho * A;<br>
+            <br>
+            float vSqr = velocityVec.sqrMagnitude;<br>
+            <br>
+            float aDrag = (k * vSqr) / m;<br>
+            <br>
+            //Has to be in a direction opposite of the bullet's velocity vector<br>
+            Vector3 dragVec = aDrag * velocityVec.normalized * -1f;<br>
+            <br>
+            return dragVec;<br>
+            }
+        </code></div>
+    </div>
+</div>
 </body>
 </html>

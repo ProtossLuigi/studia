@@ -3,9 +3,9 @@
 }
 
 body {
-    background-color: springgreen;
-    font-family: "Comic Sans MS", serif;
-    color: red;
+    background-color: white;
+    font-family: sans-serif;
+    color: black;
     max-width: 1024px;
     margin: auto;
     min-height: 100vh;
@@ -38,6 +38,12 @@ nav > ul > li a {
 
 nav > ul > li a:hover {
     background-color: #323232;
+}
+
+.content {
+    background-color: cadetblue;
+    min-height: 100vh;
+    padding: 10px;
 }
 
 aside {
@@ -75,6 +81,11 @@ img {
     margin-right: auto;
 }
 
+.code_demo {
+    font-size: 8px;
+    line-height: 7px;
+}
+
 @media only screen and (min-width: 800px) {
     nav > ul {
         display: flex;
@@ -95,7 +106,7 @@ img {
 
     .interest > img {
         float: left;
-
+        margin-right: 10px;
     }
 }
 
