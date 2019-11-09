@@ -95,9 +95,76 @@ W tym zadaniu trzeba obliczyć błędy względne dla różnych metod wyliczania 
 	\end{center}
 \end{table}
 \section{Zadanie 4.}
-
+W tym zadaniu trzeba użyć Julii z pakietem Polynomials do policzenia pierwiastków wielomianu Wilkinsona $z_{k}$, $1\leq k\leq 20$, a następnie sprawdzić ich odchył prawdziwych pierwistków tego wielomianu. Na końcu trzeba powtórzyć eksperyment z lekko zmienionym drugim współczynnikiem wielomianu.
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{r|c|c|c}
+			\bfseries $k$ & \bfseries $|P(z_{k})|$ & \bfseries $|p(z_{k})|$ & \bfseries $|z_{k}-k|$
+			\\\hline
+			\csvreader[head to column names]{zad4.csv}{}
+			{\\\k & \P & \p & \diff}
+		\end{tabular}
+		\caption{Wyniki dla pierwiastków wyliczonych przez Julia Polynomials.}
+	\end{center}
+\end{table}
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{r|c}
+			\bfseries $k$ & \bfseries $|P(z_{k})|$
+			\\\hline
+			\csvreader[head to column names]{zad4_wilkinson.csv}{}
+			{\\\k & \P}
+		\end{tabular}
+		\caption{Wyniki dla zaburzonego wielomianu.}
+	\end{center}
+\end{table}
 \section{Zadanie 5.}
-
+W tym zadaniu trzeba przeprowadzić ekperyment z modelem logistycznym, obliczając wartości kolejnych iteracji danego równania rekurencyjnego, dwa razy na Float32 (raz z obcięciem) i raz na Float64, a następnie porównać wyniki.
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad5_1.png}
+	\caption{Porównanie wykresów dla Float32 z i bez obcięcia po 10. iteracji.}
+	\label{fig:cut}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad5_2.png}
+	\caption{Porównanie wykresów dla Float32 i Float64.}
+	\label{fig:floats}
+\end{figure}
 \section{Zadanie 6.}
-
+W tym zadaniu trzeba przeanalizować zachowanie 7 ciągów stworzonych przez funkcję rekurencyjną $x_{n+1}=x_{n}^{2}+c$ dla podanych $x_{0}$ i $c$.
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_1.png}
+	\caption{$c=-2$ i $x_{0}=1$}
+	\label{fig:z61}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_2.png}
+	\caption{$c=-2$ i $x_{0}=2$}
+	\label{fig:z62}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_3.png}
+	\caption{$c=-2$ i $x_{0}=1.99999999999999$}
+	\label{fig:z63}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_4.png}
+	\caption{$c=-1$ i $x_{0}=1$}
+	\label{fig:z64}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_5.png}
+	\caption{$c=-1$ i $x_{0}=-1$}
+	\label{fig:z65}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_6.png}
+	\caption{$c=-1$ i $x_{0}=0.75$}
+	\label{fig:z66}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{zad6_7.png}
+	\caption{$c=-1$ i $x_{0}=0.25$}
+	\label{fig:z67}
+\end{figure}
 \end{document}
