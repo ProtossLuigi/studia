@@ -1,3 +1,4 @@
+#Kajetan Bilski
 using Polynomials
 P = Poly([1, -210.0, 20615.0,-1256850.0,
       53327946.0,-1672280820.0, 40171771630.0, -756111184500.0,          
@@ -30,6 +31,6 @@ z = roots(P)
 io = open("zad4_wilkinson.csv","w")
 write(io,"k,P\n")
 for i = 1:20
-    write(io, string(i,",",abs(P(getindex(z,i))),"\n"))
+    write(io, string(i,",",P(i),"\n"))
 end
 close(io)

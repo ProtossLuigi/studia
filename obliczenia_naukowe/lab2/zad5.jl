@@ -1,3 +1,4 @@
+#Kajetan Bilski
 using Plots
 p = Float32[]
 r = 3f0

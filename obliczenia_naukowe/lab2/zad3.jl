@@ -50,26 +50,26 @@ function inv_mean(n,c,r)
     end
     return s/r
 end
-n = 2:300
+n = 2:50
 gr()
 plot(n,hilb_gauss.(n))
 savefig("hilbert_gauss")
 plot(n,hilb_inv.(n))
 savefig("hilbert_inwersja")
 io = open("hilbert_gauss.csv","w")
-write(io,"n,val\n")
+write(io,"n,cond,rank,val\n")
 for i in n
-    write(io,string(i,",",hilb_gauss(i),"\n"))
+    write(io,string(i,",",cond(hilb(i)),",",rank(hilb(i)),",",hilb_gauss(i),"\n"))
 end
 close(io)
 io = open("hilbert_inwersja.csv","w")
-write(io,"n,val\n")
+write(io,"n,cond,rank,val\n")
 for i in n
-    write(io,string(i,",",hilb_inv(i),"\n"))
+    write(io,string(i,",",cond(hilb(i)),",",rank(hilb(i)),",",hilb_inv(i),"\n"))
 end
 close(io)
-n = (5,10,20)
-c = (1,10,10^3,10^7,10^12,10^16)
+n = [5,10,20]
+c = [1,10,10^3,10^7,10^12,10^16]
 r = 1000
 io = open("matcond_gauss.csv","w")
 write(io,"n,c,val\n")

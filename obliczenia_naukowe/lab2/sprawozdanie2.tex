@@ -59,19 +59,31 @@ W tym zadaniu trzeba użyć 2 różnych programów do wizualizacji, żeby naryso
 Z reguły de l'Hospitala możemy wyliczyć, że:
 \[ \lim_{x \to \infty} f(x) = \lim_{x \to -\infty} \frac{ln(1+e^x)}{e^x} = \lim_{x \to -\infty} \frac{\frac{e^x}{1+e^x}}{e^x} = \lim_{x \to -\infty} \frac{1}{1+e^x} = 1 \]
 \newline
-Widać to na wykresie do pewnego momentu.
+Widać to na wykresie do pewnego momentu. Później wykres zaczyna się wachać w górę i w dół, a na końcu zchodzi do 0 i już tam zostaje. Wachanie prawdopodobnie wynika z nakładających się błędów przy liczeniu logarytmu, co komputer robi za pomocą szeregu Taylora, którego składniki zaczynają od pewnego momentu odbiegać od rzeczywistości. Dalej funkcja się zeruje, ponieważ $e^{-x} < macheps$ co powoduje $ln(1+e^{-x})=0$ i $f(x)=0$.
 \section{Zadanie 3.}
 W tym zadaniu trzeba obliczyć błędy względne dla różnych metod wyliczania (gaussa i z inwersją) wektora x dla różnych macierzy (hilberta i losowych z ustalonym uwarunkowaniem).
-\begin{figure}[H]
-	\includegraphics[width=\linewidth]{hilbert_gauss.png}
-	\caption{Wykres pokazuje zależność błędu względnego od stopnia macierzy Hilberta dla eliminacji Gaussa.}
-	\label{fig:hilbert-gauss}
-\end{figure}
-\begin{figure}[H]
-	\includegraphics[width=\linewidth]{hilbert_inwersja.png}
-	\caption{Wykres pokazuje zależność błędu względnego od stopnia macierzy Hilberta dla metody z inwersją.}
-	\label{fig:hilbert-inv}
-\end{figure}
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{r|c|c|c}
+			\bfseries Stopień macierzy & \bfseries Wskaźnik uwarunkowania & \bfseries rank(A) & \bfseries Błąd względny
+			\\\hline
+			\csvreader[head to column names]{hilbert_gauss.csv}{}
+			{\\\n & \cond & \rank & \val}
+		\end{tabular}
+		\caption{Dane dla macierzy Hilberta o stopniu $n$ i eliminacji Gaussa.}
+	\end{center}
+\end{table}
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{r|c|c|c}
+			\bfseries Stopień macierzy & \bfseries Wskaźnik uwarunkowania & \bfseries rank(A) & \bfseries Błąd względny
+			\\\hline
+			\csvreader[head to column names]{hilbert_inwersja.csv}{}
+			{\\\n & \cond & \rank & \val}
+		\end{tabular}
+		\caption{Dane dla macierzy Hilberta o stopniu $n$ i inwersji.}
+	\end{center}
+\end{table}
 \begin{table}[H]
 	\begin{center}
 		\begin{tabular}{r|l|l}
@@ -94,6 +106,7 @@ W tym zadaniu trzeba obliczyć błędy względne dla różnych metod wyliczania 
 		\caption{Średni błąd względny dla macierzy losowych i metody z inwersją.}
 	\end{center}
 \end{table}
+Jak widać istnieje zależność między wskaźnikiem uwarunkowania macierzy zarówno dla macierzy Hilberta, jak i dla losowych. Dla macierzy Hilberta eliminacja Gaussa daje mniejsze błędy, a dla macierzy losowych błędy są podobne dla obu metod.
 \section{Zadanie 4.}
 W tym zadaniu trzeba użyć Julii z pakietem Polynomials do policzenia pierwiastków wielomianu Wilkinsona $z_{k}$, $1\leq k\leq 20$, a następnie sprawdzić ich odchył prawdziwych pierwistków tego wielomianu. Na końcu trzeba powtórzyć eksperyment z lekko zmienionym drugim współczynnikiem wielomianu.
 \begin{table}[H]
@@ -110,7 +123,7 @@ W tym zadaniu trzeba użyć Julii z pakietem Polynomials do policzenia pierwiast
 \begin{table}[H]
 	\begin{center}
 		\begin{tabular}{r|c}
-			\bfseries $k$ & \bfseries $|P(z_{k})|$
+			\bfseries $k$ & \bfseries $P(k)$
 			\\\hline
 			\csvreader[head to column names]{zad4_wilkinson.csv}{}
 			{\\\k & \P}
@@ -118,6 +131,7 @@ W tym zadaniu trzeba użyć Julii z pakietem Polynomials do policzenia pierwiast
 		\caption{Wyniki dla zaburzonego wielomianu.}
 	\end{center}
 \end{table}
+Julia Polynomials dla niezaburzonej wersji wielomianu znalazło pierwistki zespolone. Są one błędne nawet dla $P(x)$, chociaż błędy są niewilkie dla $k < 20$. Błędy dla $p(x)$ są nieporównywalnie większe od błędów dla $P(x)$. Musi to zależeć od sposobu konstruowania wielomianu przez Julię. Przy ekperymencie Wilkinsona wartości zwracane przez $P(x)$ dla starych pierwiastków nie zostawiają wątpliwości że ten wielomian jest bardzo źle uwarunkowany.
 \section{Zadanie 5.}
 W tym zadaniu trzeba przeprowadzić ekperyment z modelem logistycznym, obliczając wartości kolejnych iteracji danego równania rekurencyjnego, dwa razy na Float32 (raz z obcięciem) i raz na Float64, a następnie porównać wyniki.
 \begin{figure}[H]
@@ -130,6 +144,7 @@ W tym zadaniu trzeba przeprowadzić ekperyment z modelem logistycznym, obliczaj�
 	\caption{Porównanie wykresów dla Float32 i Float64.}
 	\label{fig:floats}
 \end{figure}
+Powyższy ciąg jest numerycznie niestabilny więc nawet małe błędy, wywołane obcięciem lub samą niedokładnośćią Float32, po kilku iteracjach zwielokrotniają się i powodują zupełne odkształcenie wykresu.
 \section{Zadanie 6.}
 W tym zadaniu trzeba przeanalizować zachowanie 7 ciągów stworzonych przez funkcję rekurencyjną $x_{n+1}=x_{n}^{2}+c$ dla podanych $x_{0}$ i $c$.
 \begin{figure}[H]
@@ -167,4 +182,5 @@ W tym zadaniu trzeba przeanalizować zachowanie 7 ciągów stworzonych przez fun
 	\caption{$c=-1$ i $x_{0}=0.25$}
 	\label{fig:z67}
 \end{figure}
+Ciągi dla przypadków 1.,2.,4. i 5. zachowują się zgodnie z wszelkimi oczekiwaniami. W przypadkach 6. i 7. dla danych $c$ i $x_{0}$ $x$ dąży do odbijania się pomiędzy 0 i -1. W przypadku 3. dla danych bardzo podobnych do przypadku 2. widzimy zupełne odkształcenie wykresu po 20 iteracjach spowodowane numeryczną niestabilnością, ponieważ w każdej iteracji błąd jest podnoszony do kwadratu.
 \end{document}

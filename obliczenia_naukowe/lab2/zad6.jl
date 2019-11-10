@@ -1,3 +1,4 @@
+#Kajetan Bilski
 using Plots
 function iterate(x0,c)
     v = Float64[]
