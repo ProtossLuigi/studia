@@ -9,6 +9,7 @@ class Turtle {
         this.maxX = 255;
         this.minY = 0;
         this.maxY = 255;
+        this.ctx.strokeStyle = "#000000";
     }
 
     forward(steps) {
@@ -108,6 +109,11 @@ class Turtle {
 
     right(angle) {
         this.left(-angle);
+    }
+
+    color(c) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = c;
     }
 
     confine(fromX,fromY,toX,toY) {

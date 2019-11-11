@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Żółw</title>
+</head>
+<body>
+<canvas id="mainCanvas" width="1000" height="1000" style="border:1px solid #000000;max-width: 100vh;max-height: 100vh">no canvas for you</canvas>
+<form>
+    <input type="text" id="input">
+    <input type="button" name="rysuj" id="button">
+</form>
+<script type="module">
+    import Turtle from "./zolw.js";
+    let turtle = new Turtle(document.getElementById("mainCanvas"));
+    /*let fre = /(?:forward\s+)(\d+\.\d*\b|\d+\b)/i;
+    let lre = /(?:left\s+)(\d+\.\d*\b|\d+\b)/i;
+    let rre = /(?:right\s+)(\d+\.\d*\b|\d+\b)/i;
+    let cre = /(?:color\s+)(#[0-9a-f]{6}\b)/i;*/
+    let mre = /(forward|left|right)\s+(\d+\.\d*\b|\d+\b)|(color)\s+(#[0-9a-f]{6}\b)/i;
+
+    function command() {
+        console.log("clicked");
+        let input = document.getElementById("input");
+        let text = input.value;
+        input.value = "";
+        let found = mre.exec(text);
+        if (found == null) {
+            return;
+        }
+        switch (found[1]) {
+            case "forward":
+                turtle.forward(Number(found[2]));
+                break;
+            case "left":
+                turtle.left(Number(found[2]));
+                break;
+            case "right":
+                turtle.right(Number(found[2]));
+                break;
+            case "color":
+                turtle.color(found[2]);
+                break;
+            default:
+                if (found[3] === "color") {
+                    turtle.color(found[4]);
+                } else {
+                    console.log("something went wrong with regex");
+                }
+        }
+    }
+
+    document.getElementById("button").addEventListener('click',command,false);
+</script>
+</body>
+</html>
