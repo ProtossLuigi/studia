@@ -10,11 +10,12 @@
 <header></header>
 <nav>
     <ul>
+        <li><a href="info.html">strona główna</a> </li>
         <li><a href="projects.html">projekty</a></li>
         <li><a href="interests.html">zainteresowania</a></li>
     </ul>
 </nav>
-<div class="content">
+<div id="content">
     <aside>
         <img src="indeks.jfif" alt="zdjęcie">
     </aside>
@@ -51,5 +52,17 @@
         </table>
     </div>
 </div>
+<script>
+    <!--
+    let topButton = document.createElement("a");
+    topButton.className = "topLink";
+    topButton.href = "#top";
+    topButton.innerHTML = "Góra strony";
+    document.body.appendChild(topButton);
+    //-->
+</script>
+<noscript>
+    <a class="topLink" href="#top">Góra strony</a>
+</noscript>
 </body>
 </html>

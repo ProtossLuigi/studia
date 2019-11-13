@@ -3,12 +3,19 @@
 }
 
 body {
-    background-color: white;
+    background-image: url("xp1080.jpg");
+    background-repeat: repeat;
     font-family: sans-serif;
     color: black;
     max-width: 1024px;
     margin: auto;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body > * {
+    flex-shrink: 0;
 }
 
 nav {
@@ -16,11 +23,14 @@ nav {
 }
 
 nav > ul {
+    display: flex;
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #1c1c1c;
+    flex-basis: 100%;
+    flex-wrap: wrap;
 }
 
 nav > ul > li {
@@ -40,10 +50,12 @@ nav > ul > li a:hover {
     background-color: #323232;
 }
 
-.content {
+#content {
     background-color: cadetblue;
-    min-height: 100vh;
     padding: 10px;
+    overflow: auto;
+    min-height: 100%;
+    flex-grow: 1;
 }
 
 aside {
@@ -86,9 +98,21 @@ img {
     line-height: 7px;
 }
 
+a.topLink {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    text-decoration: none;
+    color: initial;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}
+
 @media only screen and (min-width: 800px) {
     nav > ul {
-        display: flex;
+        flex-wrap: nowrap;
     }
 
     aside {
