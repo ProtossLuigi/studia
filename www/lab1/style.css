@@ -1,3 +1,8 @@
+@font-face {
+    font-family: GS;
+    src: url("GrotesSansDemoRegular-Dzy0.otf");
+}
+
 * {
     box-sizing: border-box;
 }
@@ -69,6 +74,7 @@ aside > img {
 }
 
 .personal_info {
+    font-family: GS, sans-serif;
     width: auto;
     padding: 18px;
 }

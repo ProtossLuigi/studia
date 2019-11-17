@@ -7,6 +7,7 @@
     <title>Portfolio</title>
 </head>
 <body>
+<a id="top"></a>
 <nav>
     <ul>
         <li><a href="info.html">strona główna</a> </li>
@@ -14,7 +15,7 @@
         <li><a href="interests.html">zainteresowania</a></li>
     </ul>
 </nav>
-<div class="content">
+<div id="content">
     <div class="project">
         <p><b>Gra 2D (w trakcie produkcji)</b></p>
         <p><a href="https://github.com/ProtossLuigi/asdf">link do repozytorium</a></p>
@@ -102,15 +103,7 @@
         </code></div>
     </div>
 </div>
-<script>
-    <!--
-    let topButton = document.createElement("a");
-    topButton.className = "topLink";
-    topButton.href = "#top";
-    topButton.innerHTML = "Góra strony";
-    document.body.appendChild(topButton);
-    //-->
-</script>
+<script src="scrollTop.js"></script>
 <noscript>
     <a class="topLink" href="#top">Góra strony</a>
 </noscript>

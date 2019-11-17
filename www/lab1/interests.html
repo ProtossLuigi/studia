@@ -7,6 +7,7 @@
     <title>Portfolio</title>
 </head>
 <body>
+<a id="top"></a>
 <nav>
     <ul>
         <li><a href="info.html">strona główna</a> </li>
@@ -14,7 +15,7 @@
         <li><a href="interests.html">zainteresowania</a></li>
     </ul>
 </nav>
-<div class="content">
+<div id="content">
     <div class="interest">
         <p style="text-align: center"><b>Języki formalne i teoria transformacji</b></p>
         <img src="automat.jpg" alt="automat">
@@ -35,15 +36,7 @@
         </ul>
     </div>
 </div>
-<script>
-    <!--
-    let topButton = document.createElement("a");
-    topButton.className = "topLink";
-    topButton.href = "#top";
-    topButton.innerHTML = "Góra strony";
-    document.body.appendChild(topButton);
-    //-->
-</script>
+<script src="scrollTop.js"></script>
 <noscript>
     <a class="topLink" href="#top">Góra strony</a>
 </noscript>
