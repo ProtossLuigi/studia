@@ -1,4 +1,11 @@
+%{
+    #include<stdio.h>
+    int wordCount = 0;
+    int lineCount = 0;
+%}
 %%
+^.*[^ \t\n].*$  lineCount++; REJECT;
+[^ \t\n]+       wordCount++; ECHO;
 ^[ \t]*\n
 ^[ \t]+
 [ \t]+$
@@ -14,5 +21,6 @@ int main(int argc,char **argv){
     yyin = fp;
     yylex();
     fclose(fp);
+    printf("%d words, %d lines\n",wordCount,lineCount);
     return 0;
 }
