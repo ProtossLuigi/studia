@@ -1,10 +1,7 @@
-%x STRING
 %x COMMENT
 %x BLOCK
 %x STRING_IN_BLOCK
 %%
-\"              {ECHO; printf("SB\n"); BEGIN(STRING);}
-<STRING>\"      {ECHO; printf("SE\n"); BEGIN(INITIAL);}
 "<"             {ECHO; BEGIN(BLOCK);}
 <BLOCK>">"      {ECHO; BEGIN(INITIAL);}
 <BLOCK>\"       {ECHO; BEGIN(STRING_IN_BLOCK);}
