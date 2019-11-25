@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\title{Zadanie 4 lista 2}
+\author{Kajetan Bilski 244942}
+
+\begin{document}
+	\maketitle
+
+Mamy język $L = \{0^{n!} : n\in N\}$ i musimy sprawdzić czy jest regularny. Jeśli jest to istnieje n dla którego możemy wykorzystać lemat o pompowaniu. Weźmy słowo $w=0^{n!}$.\\
+$w\in L$\\
+Wtedy istnieje podział $0^{n-m}0^{m}0^{n!-n}, m\leq n$ na którym możemy pompować. Po pompowaniu otrzymujemy słowa $0^{n!+(i-1)m}, i\geq 0$.
+Dla każdego $n$ i $m$ istnieje takie $i$, że $n!+(i-1)m\neq k!, k\in Z$ i nasze słowo nie należy do L.\\
+Lemat o pompowaniu nie działa na L, więc L nie jest językiem regularnym.
+\end{document}

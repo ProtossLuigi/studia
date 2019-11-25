@@ -10,15 +10,82 @@
 
 \section{Zadanie 1.}
 W tym zadaniu trzeba napisać funkcję znajdującą miejsce zerowe podanej funkcji metodą bisekcji według specyfikacji podanej w poleceniu zadania.\\
-Kod funkcji do zadań 1 - 3 jest w pliku zad123.jl.
-Funkcja najpierw sprawdza znaki wartości funkcji na końcach danego przedziału. Jeśli $sign(f(a_{0})) = sign(f(b_{0}))$ to zwraca kod błędu 1. W przeciwnym wypdaku liczy $x_{0}=\frac{b_{0}-a_{0}}{2}+a_{0}$ i wchodzi do pętli $while$.
+Kod funkcji do zadań 1 - 3 jest w pliku zad123.jl, a testy w testy.jl.\\
+Funkcja najpierw sprawdza znaki wartości funkcji na końcach danego przedziału. Jeśli $sign(f(a_{0})) = sign(f(b_{0}))$ to zwraca kod błędu 1. W przeciwnym wypdaku liczy $c_{0}=\frac{b_{0}-a_{0}}{2}+a_{0}$ i wchodzi do pętli \verb|while|. Przed każdą iteracją sprawdzane jest, czy $b_{n}-a_{n}>\delta$ i $|f(c_{n})|>\epsilon$. Jeśli tak to program porównuje znaki $f(a_{n})$ i $f(c_{n})$. W przypadku, gdy są równe to $a_{n+1}=x_{n}$ i $b_{n+1}=b_{n}$, inaczej $a_{n+1}=a_{n}$ i $b{n+1}=x{n}$. Potem liczone jest $c_{n+1}$ takim samym sposobem jak wcześniej, licznik \verb|it| się zwiększa i pętla wraca na początek. Po wyjściu z pętli program zwraca $(c_{it}, f(c_{it}), it, 0)$.
 \section{Zadanie 2.}
-
+W tym zadaniu trzeba napisać funkcję znajdującą miejsce zerowe podanej funkcji metodą Newtona (stycznych) według specyfikacji podanej w poleceniu zadania.\\
+Kod funkcji do zadań 1 - 3 jest w pliku zad123.jl, a testy w testy.jl.\\
+Funkcja najpierw sprawdza, czy $|f(x_{0})|\leq\epsilon$. Jeśli tak to zwraca $(x_{0}, f(x_{0}), 0, 0)$. Następnie sprawdza, czy $|f'(x_{0})|\leq\epsilon$ i zwraca $(x_{0}, f(x_{0}), 0, 2)$ jeśli tak. Następnie deklaruje ona $x_{1}=x_{0}-\frac{f(x_{0})}{f'(x_{0})}$ i $it = 1$. Potem wchodzi do pętli, której warunkami wykonywania kolejnych iteracji są $|x_{it}-x_{it-1}|>\delta$, $|f(x_{it})|>\epsilon$, $it < maxit$ i $|f'(x_{it})|>\epsilon$ w tej kolejności. Wewnątrz pętli liczone jest $x_{it+1}=x_{it}-\frac{f(x_{it})}{f'(x_{it})}$, a następnie $it$ zwiększa się o 1. Po wyjściu z pętli sprawdzany jest powód zakończenia się pętli (przypisana jest wartość \verb|err|) i funkcja zwraca $(x_{it}, f(x_{it}), it, err)$.
 \section{Zadanie 3.}
-
+W tym zadaniu trzeba napisać funkcję znajdującą miejsce zerowe podanej funkcji metodą siecznych według specyfikacji podanej w poleceniu zadania.\\
+Kod funkcji do zadań 1 - 3 jest w pliku zad123.jl, a testy w testy.jl.\\
+Funkcja napierw sprawdza, czy szukane miejsce zerowe nie znajduje się w $x_{0}$ lub $x_{1}$. Jeśli nie to liczy ona $x_{2}=x_{1}-\frac{x_{1}-x_{0}}{f(x_{1})-f(x_{0})}f(x_{1})$ i deklaruje \verb|it = 1|. Następnie wchodzi do pętli z warunkami $|x_{it+1}-x_{it}|>\delta$, $|f(x_{it+1})|>\epsilon$ i $it < maxit$ wewnątrz której liczone jest $x_{it+2}$ według poprzedniego wzoru i \verb|it| zwiększane o 1. Po wyjściu z pętli funkcja przypisuje wartość \verb|err| na podtawie powodu wyjścia z pętli i zwraca $(x_{it+1}, f(x_{it+1}), it, err)$.
 \section{Zadanie 4.}
-
+W tym zadaniu trzeba znaleźć miejsce zerowe funkcji $sin(x)-(\frac{1}{2}x)^2$ za pomocą każdej z wcześniej napisanych funkcji dla podanych argumentów.\\
+Wyniki dla każdej funkcji:
+\begin{table}[h!]
+  \begin{center}
+    \caption{Wyniki}
+    \label{tab:table1}
+    \begin{tabular}{c|c|c|l}
+      \textbf{Metoda} & \textbf{$r$} & \textbf{$f(r)$} & \textbf{iteracja}\\
+      \hline
+      \textbf{bisekcji} & 1.9337539672851562 & -2.7027680138402843e-7 & 15\\
+      \textbf{Newtona} &  1.933753779789742 & -2.2423316314856834e-8 & 4\\
+      \textbf{siecznych} & 1.933753644474301 & 1.564525129449379e-7 & 4\\
+    \end{tabular}
+  \end{center}
+\end{table}
+Jak widać wszystkie metody dały podobne wyniki z wynikim metody Newtona będącym trochę bliżej miejsca zerowego. Wszystkie metody znalazły miejsce zerowe blisko 2, pomimo tego że funkcja ma 2 miesjca zerowe. Dla metody bisekcji jest to spowodowane zadanym przedziałem początkowym $[1.5,2]$, w którym znajduje się tylko 1 miejsce zerowe $a<r<b$. Podobnie dla metody Newtona jest to spowodowane wyborem $x_{0}=1.5$, gdzie $f'(x_{0})<0$, dlatego funkcja szuka miejsca zerowego $r>x_{0}$. Podobnie dla metody siecznych, gdzie zadane mamy $x_{0}=1$, $x_{1}=2$, $f(x_{0})>0$ i $f(x_{1})<0$, więc funkcja szuka $r$ takiego, że $x_{0}<r<x_{1}$.\\
+Istotna różnica w wynikach jest w ilośći iteracji. Metoda bisekcji swoją niezawodność przypłaca wykładnikiem zbieżności rzędu 1, czyli gorszym od pozostałych metod, przez co znajduje miejsce zerowe wolniej.
 \section{Zadanie 5.}
-
+W tym zadaniu trzeba znaleźć oba miejsca zerowe funkcji $e^x-3x$ za pomocą funkcji z zadania 1.\\
+W związku z tym, że funkcja ma 2 miejsca zerowe, żeby znaleźć je oba trzeba dać funkcji odpowiednie przedziały początkowe. Wiedząc że $1>0$, $e<3$ i $e^2>6$, ustaliłem przedziały dla oby uruchomień funkcji na $[0,1]$ i $[1,2]$.
+\begin{table}[h!]
+  \begin{center}
+    \caption{Wyniki}
+    \label{tab:table1}
+    \begin{tabular}{c|c|c|l}
+      \textbf{Przedział} & \textbf{$r$} & \textbf{$f(r)$} & \textbf{iteracja}\\
+      \hline
+      \textbf{$[0,1]$} & 0.619140625 & -9.066320343276146e-5 & 8\\
+      \textbf{$[1,2]$} &  1.5120849609375 & -7.618578602741621e-5 & 12\\
+    \end{tabular}
+  \end{center}
+\end{table}
+Jak widać oba wywołania funkcji faktycznie znalazły różne miejsca zerowe.
 \section{Zadanie 6.}
+W tym zadaniu trzeba znaleźć miejsca zerowe obu zadanych funkcji $f_{1}$ i $f_{2}$ za pomocą wszystkich metod z zadań 1 - 3.\\
+Otrzymane wyniki:\\
+\begin{table}[h!]
+  \begin{center}
+    \caption{Wyniki dla $f_{1}$}
+    \label{tab:table1}
+    \begin{tabular}{c|c|c|c|l}
+      \textbf{Metoda} & \textbf{Dane początkowe} & \textbf{$r$} & \textbf{$f(r)$} & \textbf{iteracja}\\
+      \hline
+      \textbf{bisekcji} & $[0,1.5]$ & 1.0000076293945312 & -7.6293654275305656e-6 & 15\\
+      \textbf{Newtona} & $0.5$ & 0.9999850223207645 & 1.4977791401582508e-5 & 3\\
+      \textbf{siecznych} & $0,2$ & 1.0000017597132702 & -1.7597117218937086e-6 & 6\\
+    \end{tabular}
+  \end{center}
+\end{table}
+\begin{table}[h!]
+  \begin{center}
+    \caption{Wyniki dla $f_{2}$}
+    \label{tab:table1}
+    \begin{tabular}{c|c|c|c|l}
+      \textbf{Metoda} & \textbf{Dane początkowe} & \textbf{$r$} & \textbf{$f(r)$} & \textbf{iteracja}\\
+      \hline
+      \textbf{bisekcji} & $[-0.5,1]$ & 6.103515625e-5 & 6.1031431073386065e-5 & 12\\
+      \textbf{Newtona} & $0.5$ & -3.0642493416461764e-7 & -3.0642502806087233e-7 & 5\\
+      \textbf{siecznych} & $1,0.5$ & 4.0393027637051994e-7 & 4.0393011321088476e-7 & 9\\
+    \end{tabular}
+  \end{center}
+\end{table}
+Jak widać dla wybranych przeze mnie danych początkowych wszystkie funkcje znajdują miejsca zerowe obu funkcji, a jedyna istotna różnica leży w ilości potrzebnych iteracji, gdzie ilość iteracji jest odwrotnie proporcjonalna do wykładnika zbieżności danej metody.\\
+Ciekawsze rzeczy dzieją się dla innych punktów startowych w metodach Newtona i siecznych. W przypadku metody Newtona dla $f_{1}$ jeśli weżmiemy $x_{0}>1$ to zaczynają się dziać dziwne rzeczy. Dla  $x_{0}$ bliskiego 1 funkcja daje jeszcze dokładne wyniki, ale dla większych $x_{0}$ pochodna w $x_{0}$ staje się bardzo bliska 0, co powoduje że $x_{1}$ jest bardzo daleko na minusie, przy większych $x_{0}$ do tego stopnia, że Julia zaokrągla $f(x_{1}) = \infty$ i $f'(x_{1})=-\infty$, co potrafi spowodować że dostajemy na wyniku NaNy.\\
+Dla metody Newtona w $f_{2}$ jeśli weźmiemy $x_{0}>1$ to $f'(x_{0})<0$, więc funkcja znajduje następne punkty na prawo od poprzednich, chociaż jedyne miejsce zerowe jest w 0. Pomimo tego $f_{2}$ maleje, więc funkcja znajduje pierwszy punkt gdzie $f_{2}$ jest wystarczająco blisko 0, chociaż nie ma tam miejsca zerowego.
+\[ \lim_{n \to \infty}x_{n}=\infty\]
+$x_{0}$ nie może równać się 1, ponieważ $f_{2}'(1)=0$ i funkcja zwróciła by kod błędu 2.
 \end{document}
