@@ -10,14 +10,8 @@
 <body>
 <canvas id="mainCanvas" width="1000" height="1000"></canvas>
 <script>
-    let canvas = document.getElementById("mainCanvas");
-    let ctx = canvas.getContext("2d");
     window.onload = function () {
-        let img = new Image();
-        img.onload = function() {
-            ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        };
-        img.src = "xp1080.jpg";
+        init();
     };
 </script>
 </body>
