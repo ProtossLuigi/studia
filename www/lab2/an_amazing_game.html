@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>An amazing game</title>
+    <script src="script.js"></script>
+</head>
+<body>
+<canvas id="mainCanvas" width="1000" height="1000"></canvas>
+<script>
+    let canvas = document.getElementById("mainCanvas");
+    let ctx = canvas.getContext("2d");
+    window.onload = function () {
+        let img = new Image();
+        img.onload = function() {
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        };
+        img.src = "xp1080.jpg";
+    };
+</script>
+</body>
+</html>
