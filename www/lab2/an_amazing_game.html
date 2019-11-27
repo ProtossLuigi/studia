@@ -9,10 +9,34 @@
 </head>
 <body>
 <canvas id="mainCanvas" width="1000" height="1000"></canvas>
+<a class="buttonLink" href="gallery.html">Choose image</a>
+<a class="buttonLink" onclick="init()">Refresh</a>
+<form>
+    Rows:
+    <input id="rowButton" type="number" name="rows" min="3">
+    <input id="columnButton" type="number" name="columns" min="3">
+    <input type="button" value="Ok" onclick="changeDims()">
+</form>
 <script>
+    let rowButton = document.getElementById("rowButton");
+    let columnButton = document.getElementById("columnButton");
+
     window.onload = function () {
+        document.body.style = "margin:" + MARGIN +"px;max-width:" + PUZZLE_MAX_WIDTH + ";";
         init();
     };
+
+    function changeDims() {
+        if (rowButton.value >= 3) {
+            _puzzleRows = rowButton.value;
+        }
+        if (columnButton.value >= 3) {
+            _puzzleColumns = columnButton.value;
+        }
+        document.getElementById("rowButton").value = "";
+        document.getElementById("columnButton").value = "";
+        init();
+    }
 </script>
 </body>
 </html>

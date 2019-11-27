@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>image gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+    let images = [
+        "xp1080.jpg",
+        "stock-photo-abstract-image-of-looking-up-at-modern-glass-and-concrete-building-architectural-exterior-detail-751298716.jpg",
+        "stock-photo-abstract-lines-on-architecture-566857030.jpg",
+        "stock-photo-abstract-red-building-blue-sky-1539585524.jpg",
+        "stock-photo-close-up-photo-of-technological-metal-grid-structure-abstract-black-and-white-background-image-on-1096554218.jpg",
+        "stock-photo-kuala-lumpur-malaysia-november-office-buildings-from-below-angle-view-1565108851.jpg",
+        "stock-photo-modern-architecture-underside-view-of-curvilinear-balconies-public-or-office-building-exterior-562776268.jpg",
+        "stock-photo-spiral-artistic-stairs-black-white-1558451087.jpg",
+        "stock-photo-staircase-curve-architecture-details-cement-stair-curve-design-1114761878.jpg",
+        "stock-photo-underside-panoramic-and-perspective-view-to-steel-blue-glass-high-rise-building-skyscrapers-367937186.jpg",
+        "stock-photo-urban-geometry-looking-up-to-glass-building-modern-architecture-glass-and-steel-abstract-334910669.jpg",
+        "stock-photo-wide-angle-abstract-background-view-of-steel-light-blue-high-rise-commercial-building-skyscraper-568726978.jpg"
+    ];
+    let compImages = [
+        "xp1080-comp.jpg",
+        "stock-photo-abstract-image-of-looking-up-at-modern-glass-and-concrete-building-architectural-exterior-detail-751298716-comp.jpg",
+        "stock-photo-abstract-lines-on-architecture-566857030-comp.jpg",
+        "stock-photo-abstract-red-building-blue-sky-1539585524-comp.jpg",
+        "stock-photo-close-up-photo-of-technological-metal-grid-structure-abstract-black-and-white-background-image-on-1096554218-comp.jpg",
+        "stock-photo-kuala-lumpur-malaysia-november-office-buildings-from-below-angle-view-1565108851-comp.jpg",
+        "stock-photo-modern-architecture-underside-view-of-curvilinear-balconies-public-or-office-building-exterior-562776268-comp.jpg",
+        "stock-photo-spiral-artistic-stairs-black-white-1558451087-comp.jpg",
+        "stock-photo-staircase-curve-architecture-details-cement-stair-curve-design-1114761878-comp.jpg",
+        "stock-photo-underside-panoramic-and-perspective-view-to-steel-blue-glass-high-rise-building-skyscrapers-367937186-comp.jpg",
+        "stock-photo-urban-geometry-looking-up-to-glass-building-modern-architecture-glass-and-steel-abstract-334910669-comp.jpg",
+        "stock-photo-wide-angle-abstract-background-view-of-steel-light-blue-high-rise-commercial-building-skyscraper-568726978-comp.jpg"
+    ];
+    
+    function loadImage(src) {
+        return new Promise((resolve,reject) => {
+            let img = new Image();
+            img.addEventListener("load", () => resolve(img));
+            img.addEventListener("error", () => {
+                reject(new Error("couldn't load image ${src}"));
+            });
+            img.src = src;
+        });
+    }
+
+    for (let i = 0; i < compImages.length; i++) {
+        let newLink = document.createElement("a");
+        newLink.className = "imageChooser";
+        newLink.href = "an_amazing_game.html?imgSrc=" + images[i];
+        let compImg = new Image();
+        compImg.src = compImages[i];
+        compImg.width = 400;
+        compImg.height = 400;
+        newLink.appendChild(compImg);
+        document.body.appendChild(newLink);
+        loadImage(images[i]).then(img => {
+            img.width = 400;
+            img.height = 400;
+            compImg.parentNode.replaceChild(img,compImg);
+        }).catch(error => console.log(error));
+    }
+</script>
+</body>
+</html>
