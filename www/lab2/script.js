@@ -134,7 +134,7 @@ function buildPieces(){
         }
     }
     window.onresize = onResizePreShuffle;
-    document.onmousedown = shufflePuzzle;
+    _canvas.onclick = shufflePuzzle;
 }
 
 function shufflePuzzle(){
@@ -166,6 +166,7 @@ function shufflePuzzle(){
     document.onclick = movePiece;
     document.onmousemove = updatePuzzle;
     document.onmousedown = null;
+    _canvas.onclick = null;
 }
 
 function shuffleArray(o){

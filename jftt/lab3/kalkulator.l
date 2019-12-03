@@ -4,19 +4,21 @@
     #include <string>
     int yylex();
 %}
+%x CANTNEG
 %%
-\#(.|\\\n)*$
-[ \t]+
-(\\\n)+
-[0-9]+  {yylval=std::stoi(yytext,nullptr); return VAL;}
-\+      {return ADD;}
-\-      {return SUB;}
-\*      {return MUL;}
-\/      {return DIV;}
-\^      {return POW;}
-\%      {return MOD;}
-\(      {return LNAW;}
-\)      {return RNAW;}
-\n      {return END;}
-.       {return ERROR;}
+<*>\#(.|\\\n)*$    {BEGIN(INITIAL);}
+<*>[ \t]+
+<*>(\\\n)+
+\-?[0-9]+   {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
+<*>[0-9]+   {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
+<*>\+       {BEGIN(INITIAL); return ADD;}
+<*>\-       {BEGIN(INITIAL); return SUB;}
+<*>\*       {BEGIN(INITIAL); return MUL;}
+<*>\/       {BEGIN(INITIAL); return DIV;}
+<*>\^       {BEGIN(INITIAL); return POW;}
+<*>\%       {BEGIN(INITIAL); return MOD;}
+<*>\(       {BEGIN(INITIAL); return LNAW;}
+<*>\)       {BEGIN(CANTNEG); return RNAW;}
+<*>\n       {BEGIN(INITIAL); return END;}
+<*>.        {return ERROR;}
 %%
