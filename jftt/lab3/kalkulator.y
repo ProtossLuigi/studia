@@ -45,6 +45,7 @@ exp:
 %%
 int yyerror(const char* s){
     std::cout << "Error" << std::endl;
+    q = std::queue<std::string>();
 }
 int main(){
     yyparse();

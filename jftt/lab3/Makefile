@@ -8,7 +8,7 @@ kalkulator: kalkulator.y kalkulator.l
 	g++ -o kalkulator kalkulator_y.cpp kalkulator_l.cpp
 
 clean:
-	rm -f *.cpp *.h
+	rm -f *.cpp *.hpp
 
 cleanall: clean
 	rm -f kalkulator

@@ -1,6 +1,6 @@
 %option noyywrap
 %{
-    #include "kalkulator_y.h"
+    #include "kalkulator_y.hpp"
     #include <string>
     int yylex();
 %}
@@ -9,8 +9,8 @@
 <*>\#(.|\\\n)*$    {BEGIN(INITIAL);}
 <*>[ \t]+
 <*>(\\\n)+
-\-?[0-9]+   {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
-<*>[0-9]+   {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
+<INITIAL>\-?[0-9]+  {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
+<CANTNEG>[0-9]+     {yylval=std::stoi(yytext,nullptr); BEGIN(CANTNEG); return VAL;}
 <*>\+       {BEGIN(INITIAL); return ADD;}
 <*>\-       {BEGIN(INITIAL); return SUB;}
 <*>\*       {BEGIN(INITIAL); return MUL;}
