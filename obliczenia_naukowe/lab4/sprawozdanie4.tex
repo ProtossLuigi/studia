@@ -51,7 +51,7 @@ $a[n] \leftarrow fx[n]$\\
 		$a[k] \leftarrow a[k]-x[n-i]*a[k+1]$}}
 \KwRet $a$
 \end{algorithm}
-Jak widać mamy dwie pętle, których łączny czas wykonania jest $O(n^2)$. Funkcja zaczyna od współczynnika $a_n$ który jest równy $f[x_0,...,x_n]$ i jest $n$-tą pochodną szukanego wielomianu. Następnie w każdej iteracji pierwszej pętli używa $x$ i ilorazu różnicowego o niższym indeksie do znalezienia pochodnej wielomianu o 1 stopień niższej, aż dojdzie do stopnia 0, czyli szukanego wielomianu.
+Jak widać mamy dwie pętle, których łączny czas wykonania jest $O(n^2)$. Funkcja zaczyna od współczynnika $a_n$ który jest równy $f[x_0,...,x_n]$. Potem funkcja dodaje koolejne punkty $x$ i ilorazy różnicowe o malejących indeksach. W każdej iteracji i pętli dodawany jest współczynnik $a_{n-i}=fx[n-i]$ i akualizowane są wszystkie dotychczasowe współczynniki z użyciem $x_{n-i}$.
 \section{Zadanie 4.}
 W tym zadaniiu trzeba zaimplementować funkcję, która dla zadanej funkcji stworzy przybliżający ją wielomian interpolacyjny dla $n+1$ punktów w przedziale $[a,b]$, a następnie narysuje je obok siebie na wykresie używając funkcji z zadań 1 i 3.\\
 Kody do zadań 1 - 4 są w pliku zad1234.jl, a testy do nich w testy.jl.\\
@@ -64,6 +64,7 @@ $h \leftarrow (b-a)/n$\\
 $fx \leftarrow$ \verb|ilorazyRoznicowe(|$x$,$y$\verb|)|\\
 \emph{Następnie funkcja nakłada na wykres na przedziale $z\in[a,b]$ funkcje $f(z)$ i $warNewton(x,fx,z)$.}
 \end{algorithm}
+Funkcji ilorazyRoznicowe używam do znalezienia ilorazów różnicowych, potrzebnych dla funkcji warNewton, której używam do wyznaczania wartości wielomianu interpolacyjnego.
 \section{Zadanie 5.}
 W tym zadaniu trzeba użyć funkcji \verb|rysujNnfx| żeby narysować wykresy z podanymi danymi.
 Kod w pliku zad5.jl.

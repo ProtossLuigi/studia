@@ -38,12 +38,12 @@
 
         // vertex shader source code
         let vertCode =
-            'uniform float alpha;' +
+            'uniform float transform;' +
                 'uniform float size;' +
             'attribute vec3 coordinates;' +
 
             'void main(void) {' +
-            ' gl_Position = vec4(coordinates, alpha);' +
+            ' gl_Position = vec4(coordinates, transform);' +
             'gl_PointSize = size;'+
             '}';
 
@@ -99,22 +99,22 @@
         // Bind vertex buffer object
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 
-        let alpha = gl.getUniformLocation(shaderProgram,'alpha');
+        let transform = gl.getUniformLocation(shaderProgram,'transform');
         let size = gl.getUniformLocation(shaderProgram,'size');
         //let color = gl.getUniformLocation(shaderProgram,'color');
 
-        gl.uniform1f(alpha,1.0);
+        gl.uniform1f(transform,1.0);
         gl.uniform1f(size,5.0);
         //gl.uniform4fv(color,[1.0,1.0,1.0,1.0]);
 
         // Get the attribute location
-        let coord = gl.getAttribLocation(shaderProgram, "coordinates");
+        //let coord = gl.getAttribLocation(shaderProgram, "coordinates");
 
         // Point an attribute to the currently bound VBO
         gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
 
         // Enable the attribute
-        gl.enableVertexAttribArray(coord);
+        gl.enableVertexAttribArray(1);
 
         /*============= Drawing the primitive ===============*/
 
