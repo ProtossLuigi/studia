@@ -16,8 +16,10 @@
     }
 </script>
 <script id="fragmentSource" type="notjs">
+    uniform lowp vec3 color;
+    uniform lowp float alpha;
     void main(){
-        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+        gl_FragColor = vec4(color,alpha);
     }
 </script>
 <script>
@@ -37,13 +39,31 @@
     let frameId = 0;
     let playerScore = 0;
     let CPUScore = 0;
+    let numberWidth = 0.45;
+    let numberHeight = 0.75;
+    let midlineWidth = 0.05;
+    let numberMargin = 0.15;
 
     let ballCoordBuffer;
     let platformCoordBuffer;
+    let midlineBuffer;
+
+    let zero = {};
+    let one = {};
+    let two = {};
+    let three = {};
+    let four = {};
+    let five = {};
+    let six = {};
+    let seven = {};
+    let eight = {};
+    let nine = {};
 
     let depthLoc;
     let offsetLoc;
     let coordLoc;
+    let colorLoc;
+    let alphaLoc;
 
     function createShader(type, source) {
         let shader = gl.createShader(type);
@@ -77,7 +97,62 @@
         gl.clearColor(0.0,0.0,0.0,1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
+        gl.uniform3fv(colorLoc,[0.1,0.1,0.1]);
+        gl.uniform1f(depthLoc,0.5);
+        gl.uniform1f(alphaLoc,0.5);
+        gl.uniform2fv(offsetLoc,[0.0,0.0]);
+        gl.bindBuffer(gl.ARRAY_BUFFER,midlineBuffer);
+        gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+
+        let number;
+        switch (playerScore%5) {
+            case 0:
+                number = zero;
+                break;
+            case 1:
+                number = one;
+                break;
+            case 2:
+                number = two;
+                break;
+            case 3:
+                number = three;
+                break;
+            case 4:
+                number = four;
+                break;
+        }
+        gl.uniform2fv(offsetLoc,[-numberWidth-numberMargin,-numberHeight/2]);
+        gl.bindBuffer(gl.ARRAY_BUFFER,number.buffer);
+        gl.vertexAttribPointer(colorLoc,2,gl.FLOAT,false,0,0);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,number.length);
+
+        switch (CPUScore%5) {
+            case 0:
+                number = zero;
+                break;
+            case 1:
+                number = one;
+                break;
+            case 2:
+                number = two;
+                break;
+            case 3:
+                number = three;
+                break;
+            case 4:
+                number = four;
+                break;
+        }
+        gl.uniform2fv(offsetLoc,[numberMargin,-numberHeight/2]);
+        gl.bindBuffer(gl.ARRAY_BUFFER,number.buffer);
+        gl.vertexAttribPointer(colorLoc,2,gl.FLOAT,false,0,0);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,number.length);
+
         gl.uniform1f(depthLoc,0.0);
+        gl.uniform3fv(colorLoc,[1.0,1.0,1.0]);
+        gl.uniform1f(alphaLoc,1.0);
         gl.uniform2fv(offsetLoc,ballPos);
         gl.bindBuffer(gl.ARRAY_BUFFER,ballCoordBuffer);
         gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
@@ -192,31 +267,139 @@
         gl.useProgram(program);
         depthLoc = gl.getUniformLocation(program,"depth");
         offsetLoc = gl.getUniformLocation(program,"offset");
+        colorLoc = gl.getUniformLocation(program,"color");
+        alphaLoc = gl.getUniformLocation(program,"alpha");
         coordLoc = gl.getAttribLocation(program,"coordinates");
+        console.log(depthLoc,offsetLoc,colorLoc,alphaLoc,colorLoc);
         gl.enableVertexAttribArray(coordLoc);
         ballCoordBuffer = gl.createBuffer();
         platformCoordBuffer = gl.createBuffer();
+        midlineBuffer = gl.createBuffer();
         gl.clearColor(0.0,0.0,0.0,1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
         gl.viewport(0,0,canvas.width,canvas.height);
 
-        let platformCoords = [
+        let vertices = [
             platformHeight/2,platformWidth/2,
             -platformHeight/2,platformWidth/2,
             platformHeight/2,-platformWidth/2,
             -platformHeight/2,-platformWidth/2
         ];
         gl.bindBuffer(gl.ARRAY_BUFFER,platformCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(platformCoords),gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+
         gl.bindBuffer(gl.ARRAY_BUFFER,ballCoordBuffer);
-        let ballCoords = [
+        vertices = [
             ballSize/2,ballSize/2,
             ballSize/2,-ballSize/2,
             -ballSize/2,ballSize/2,
             -ballSize/2,-ballSize/2
         ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(ballCoords),gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER,midlineBuffer);
+        vertices = [
+            -midlineWidth/2,1.0,
+            midlineWidth/2,1.0,
+            -midlineWidth/2,-1.0,
+            midlineWidth/2,-1.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+
+        zero.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,zero.buffer);
+        vertices = [
+            0.0,numberHeight,
+            numberWidth/3,numberHeight*4/5,
+            numberWidth,numberHeight,
+            numberWidth*2/3,numberHeight*4/5,
+            numberWidth,0.0,
+            numberWidth*2/3,numberHeight/5,
+            0.0,0.0,
+            numberWidth/3,numberHeight/5,
+            0.0,numberHeight,
+            numberWidth/3,numberHeight*4/5
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        zero.length = vertices.length/2;
+
+        one.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,one.buffer);
+        vertices = [
+            numberWidth*2/3,numberHeight,
+            numberWidth,numberHeight,
+            numberWidth*2/3,0.0,
+            numberWidth,0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        one.length = vertices.length/2;
+
+
+        two.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,two.buffer);
+        vertices = [
+            0.0,numberHeight,
+            0.0,numberHeight*4/5,
+            numberWidth,numberHeight,
+            numberWidth*2/3,numberHeight*4/5,
+            numberWidth,numberHeight*2/5,
+            numberWidth*2/3,numberHeight*3/5,
+            numberWidth/3,numberHeight*2/5,
+            0.0,numberHeight*3/5,
+            numberWidth/3,numberHeight/5,
+            0.0,0.0,
+            numberWidth,numberHeight/5,
+            numberWidth,0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        two.length = vertices.length/2;
+
+        three.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,three.buffer);
+        vertices = [
+            0.0,numberHeight,
+            0.0,numberHeight*4/5,
+            numberWidth,numberHeight,
+            numberWidth*2/3,numberHeight*4/5,
+            numberWidth,numberHeight*3/5,
+            numberWidth*2/3,numberHeight*2/5,
+            0.0,numberHeight*3/5,
+            0.0,numberHeight*2/5,
+            numberWidth*2/3,numberHeight*3/5,
+            numberWidth,numberHeight*2/5,
+            numberWidth,numberHeight*3/5,
+            numberWidth,numberHeight*2/5,
+            numberWidth*2/3,numberHeight/5,
+            numberWidth,0.0,
+            0.0,0.0,
+            0.0,numberHeight/5,
+            numberWidth*2/3,numberHeight/5
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        three.length = vertices.length/2;
+
+        four.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,four.buffer);
+        vertices = [
+            numberWidth/3,numberHeight,
+            0.0,numberHeight,
+            numberWidth/3,numberHeight*3/5,
+            0.0,numberHeight*2/5,
+            numberWidth*2/3,numberHeight*2/5,
+            numberWidth*2/3,numberHeight*3/5,
+            numberWidth,numberHeight*3/5,
+            numberWidth,0.0,
+            numberWidth*2/3,0.0,
+            numberWidth,numberHeight,
+            numberWidth*2/3,numberHeight
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        four.length = vertices.length/2;
+
+
+
+
         gl.bindBuffer(gl.ARRAY_BUFFER,null);
 
         draw();
