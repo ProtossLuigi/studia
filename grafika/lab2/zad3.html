@@ -27,18 +27,19 @@
     let gl = canvas.getContext("webgl");
     let platformWidth = 0.4;
     let platformHeight = 0.05;
-    let playerPos = 0.0;
-    let opponentPos = 0.0;
+    let playerLeftPos = 0.0;
+    let playerRightPos = 0.0;
     let ballSize = 0.05;
     let playerMaxSpeed = 0.002;
-    let playerCurrentSpeed = 0.0;
+    let playerLeftCurrentSpeed = 0.0;
+    let playerRightCurrentSpeed = 0.0;
     let ballPos = [0.0,0.0];
     let ballCurrentSpeed = [0.0,0.0];
     let ballMaxSpeed = 0.002;
     let lastTime;
     let frameId = 0;
-    let playerScore = 0;
-    let CPUScore = 0;
+    let playerLeftScore = 0;
+    let playerRightScore = 0;
     let numberWidth = 0.45;
     let numberHeight = 0.75;
     let midlineWidth = 0.05;
@@ -48,16 +49,146 @@
     let platformCoordBuffer;
     let midlineBuffer;
 
-    let zero = {};
-    let one = {};
-    let two = {};
-    let three = {};
-    let four = {};
-    let five = {};
-    let six = {};
-    let seven = {};
-    let eight = {};
-    let nine = {};
+    let numbers = [{},{},{},{},{},{},{},{},{},{}];
+
+    numbers[0].coords = [
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        numberWidth,0.0,
+        numberWidth*2/3,numberHeight/5,
+        0.0,0.0,
+        numberWidth/3,numberHeight/5,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5
+    ];
+
+    numbers[1].coords = [
+        numberWidth*2/3,numberHeight,
+        numberWidth,numberHeight,
+        numberWidth*2/3,0.0,
+        numberWidth,0.0
+    ];
+
+    numbers[2].coords = [
+        0.0,numberHeight,
+        0.0,numberHeight*4/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        numberWidth,numberHeight*2/5,
+        numberWidth*2/3,numberHeight*3/5,
+        numberWidth/3,numberHeight*2/5,
+        0.0,numberHeight*3/5,
+        numberWidth/3,numberHeight/5,
+        0.0,0.0,
+        numberWidth,numberHeight/5,
+        numberWidth,0.0
+    ];
+
+    numbers[3].coords = [
+        0.0,numberHeight,
+        0.0,numberHeight*4/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        numberWidth,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        0.0,numberHeight*3/5,
+        0.0,numberHeight*2/5,
+        numberWidth,numberHeight*2/5,
+        numberWidth,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        numberWidth,numberHeight*2/5,
+        numberWidth*2/3,numberHeight/5,
+        numberWidth,0.0,
+        0.0,numberHeight/5,
+        0.0,0.0
+    ];
+
+    numbers[4].coords = [
+        numberWidth/3,numberHeight,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*3/5,
+        0.0,numberHeight*2/5,
+        numberWidth*2/3,numberHeight*3/5,
+        numberWidth,numberHeight*2/5,
+        numberWidth*2/3,numberHeight,
+        numberWidth,numberHeight,
+        numberWidth*2/3,0.0,
+        numberWidth,0.0
+    ];
+
+    numbers[5].coords = [
+        numberWidth,numberHeight,
+        numberWidth,numberHeight*4/5,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5,
+        0.0,numberHeight*2/5,
+        numberWidth/3,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        numberWidth,numberHeight*3/5,
+        numberWidth*2/3,numberHeight/5,
+        numberWidth,0.0,
+        0.0,numberHeight/5,
+        0.0,0.0
+    ];
+
+    numbers[6].coords = [
+        numberWidth,numberHeight,
+        numberWidth,numberHeight*4/5,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5,
+        0.0,0.0,
+        numberWidth/3,numberHeight/5,
+        numberWidth,0.0,
+        numberWidth*2/3,numberHeight/5,
+        numberWidth,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        numberWidth/3,numberHeight*3/5,
+        numberWidth/3,numberHeight*2/5
+    ];
+
+    numbers[7].coords = [
+        0.0,numberHeight,
+        0.0,numberHeight*4/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        numberWidth,0.0,
+        numberWidth*2/3,0.0
+    ];
+
+    numbers[8].coords = [
+        numberWidth/3,numberHeight*2/5,
+        0.0,numberHeight*2/5,
+        numberWidth/3,numberHeight/5,
+        0.0,0.0,
+        0.0,numberHeight/5,
+        numberWidth,0.0,
+        numberWidth*2/3,numberHeight/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5,
+        0.0,numberHeight*2/5,
+        numberWidth/3,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        numberWidth*2/3,numberHeight*3/5
+    ];
+
+    numbers[9].coords = [
+        0.0,0.0,
+        0.0,numberHeight/5,
+        numberWidth,0.0,
+        numberWidth*2/3,numberHeight/5,
+        numberWidth,numberHeight,
+        numberWidth*2/3,numberHeight*4/5,
+        0.0,numberHeight,
+        numberWidth/3,numberHeight*4/5,
+        0.0,numberHeight*2/5,
+        numberWidth/3,numberHeight*3/5,
+        numberWidth*2/3,numberHeight*2/5,
+        numberWidth*2/3,numberHeight*3/5
+    ];
 
     let depthLoc;
     let offsetLoc;
@@ -105,50 +236,15 @@
         gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
 
-        let number;
-        switch (playerScore%5) {
-            case 0:
-                number = zero;
-                break;
-            case 1:
-                number = one;
-                break;
-            case 2:
-                number = two;
-                break;
-            case 3:
-                number = three;
-                break;
-            case 4:
-                number = four;
-                break;
-        }
         gl.uniform2fv(offsetLoc,[-numberWidth-numberMargin,-numberHeight/2]);
-        gl.bindBuffer(gl.ARRAY_BUFFER,number.buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER,numbers[playerLeftScore%10].buffer);
         gl.vertexAttribPointer(colorLoc,2,gl.FLOAT,false,0,0);
-        gl.drawArrays(gl.TRIANGLE_STRIP,0,number.length);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,numbers[playerLeftScore%10].length);
 
-        switch (CPUScore%5) {
-            case 0:
-                number = zero;
-                break;
-            case 1:
-                number = one;
-                break;
-            case 2:
-                number = two;
-                break;
-            case 3:
-                number = three;
-                break;
-            case 4:
-                number = four;
-                break;
-        }
         gl.uniform2fv(offsetLoc,[numberMargin,-numberHeight/2]);
-        gl.bindBuffer(gl.ARRAY_BUFFER,number.buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER,numbers[playerRightScore%10].buffer);
         gl.vertexAttribPointer(colorLoc,2,gl.FLOAT,false,0,0);
-        gl.drawArrays(gl.TRIANGLE_STRIP,0,number.length);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,numbers[playerRightScore%10].length);
 
         gl.uniform1f(depthLoc,0.0);
         gl.uniform3fv(colorLoc,[1.0,1.0,1.0]);
@@ -158,12 +254,12 @@
         gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
 
-        gl.uniform2fv(offsetLoc,[-1.0+platformHeight/2,playerPos]);
+        gl.uniform2fv(offsetLoc,[-1.0+platformHeight/2,playerLeftPos]);
         gl.bindBuffer(gl.ARRAY_BUFFER,platformCoordBuffer);
         gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
 
-        gl.uniform2fv(offsetLoc,[1.0-platformHeight/2,opponentPos]);
+        gl.uniform2fv(offsetLoc,[1.0-platformHeight/2,playerRightPos]);
         gl.bindBuffer(gl.ARRAY_BUFFER,platformCoordBuffer);
         gl.vertexAttribPointer(coordLoc,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
@@ -174,21 +270,29 @@
     function animate(time) {
         let timeDelta = time - lastTime;
         lastTime = time;
-        playerPos += playerCurrentSpeed * timeDelta;
-        if (playerPos > 1.0-platformWidth/2){
-            playerPos = 1.0-platformWidth/2;
-            playerCurrentSpeed = 0.0;
-        } else if (playerPos < -1.0+platformWidth/2){
-            playerPos = -1.0+platformWidth/2;
-            playerCurrentSpeed = 0.0;
+        playerLeftPos += playerLeftCurrentSpeed * timeDelta;
+        if (playerLeftPos > 1.0-platformWidth/2){
+            playerLeftPos = 1.0-platformWidth/2;
+            playerLeftCurrentSpeed = 0.0;
+        } else if (playerLeftPos < -1.0+platformWidth/2){
+            playerLeftPos = -1.0+platformWidth/2;
+            playerLeftCurrentSpeed = 0.0;
+        }
+        playerRightPos += playerRightCurrentSpeed * timeDelta;
+        if (playerRightPos > 1.0-platformWidth/2){
+            playerRightPos = 1.0-platformWidth/2;
+            playerRightCurrentSpeed = 0.0;
+        } else if (playerRightPos < -1.0+platformWidth/2){
+            playerRightPos = -1.0+platformWidth/2;
+            playerRightCurrentSpeed = 0.0;
         }
         ballPos[0] += ballCurrentSpeed[0] * timeDelta;
         ballPos[1] += ballCurrentSpeed[1] * timeDelta;
-        if (ballPos[0]-ballSize/2 < platformHeight-1.0 && (Math.abs(ballPos[1]-playerPos) < (platformWidth+ballSize)/2)){
+        if (ballPos[0]-ballSize/2 < platformHeight-1.0 && (Math.abs(ballPos[1]-playerLeftPos) < (platformWidth+ballSize)/2)){
             ballCurrentSpeed[0] *= -1;
             ballPos[0] = -2.0+platformHeight*2-ballPos[0];
         }
-        if (ballPos[0]+ballSize/2 > -platformHeight+1.0 && (Math.abs(ballPos[1]-opponentPos) < (platformWidth+ballSize)/2)){
+        if (ballPos[0]+ballSize/2 > -platformHeight+1.0 && (Math.abs(ballPos[1]-playerRightPos) < (platformWidth+ballSize)/2)){
             ballCurrentSpeed[0] *= -1;
             ballPos[0] = 2.0-platformHeight*2-ballPos[0];
         }
@@ -204,11 +308,11 @@
         gl.finish();
         frameId = window.requestAnimationFrame(animate);
         if (ballPos[0]-ballSize/2 < -1.0){
-            CPUScore++;
+            playerRightScore++;
             resetGame();
         }
         if (ballPos[0]+ballSize/2 > 1.0){
-            playerScore++;
+            playerLeftScore++;
             resetGame();
         }
     }
@@ -224,9 +328,10 @@
         console.log("it reset");
         if (frameId !== 0) window.cancelAnimationFrame(frameId);
         frameId = 0;
-        playerPos = 0.0;
-        playerCurrentSpeed = 0.0;
-        opponentPos = 0.0;
+        playerLeftPos = 0.0;
+        playerRightPos = 0.0;
+        playerLeftCurrentSpeed = 0.0;
+        playerRightCurrentSpeed = 0.0;
         ballPos = [0.0,0.0];
         ballCurrentSpeed = [0.0,0.0];
         draw();
@@ -234,12 +339,20 @@
     
     function onKeyDown(e) {
         switch (e.code) {
+            case "KeyW":
+                playerLeftCurrentSpeed = playerMaxSpeed;
+                if (frameId === 0) startGame();
+                break;
+            case "KeyS":
+                playerLeftCurrentSpeed = -playerMaxSpeed;
+                if (frameId === 0) startGame();
+                break;
             case "ArrowUp":
-                playerCurrentSpeed = playerMaxSpeed;
+                playerRightCurrentSpeed = playerMaxSpeed;
                 if (frameId === 0) startGame();
                 break;
             case "ArrowDown":
-                playerCurrentSpeed = -playerMaxSpeed;
+                playerRightCurrentSpeed = -playerMaxSpeed;
                 if (frameId === 0) startGame();
                 break;
             default:
@@ -249,9 +362,13 @@
 
     function onKeyUp(e) {
         switch (e.code) {
+            case "KeyW":
+            case "KeyS":
+                playerLeftCurrentSpeed = 0.0;
+                break;
             case "ArrowUp":
             case "ArrowDown":
-                playerCurrentSpeed = 0.0;
+                playerRightCurrentSpeed = 0.0;
                 break;
             default:
                 return;
@@ -307,98 +424,12 @@
         ];
         gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
 
-        zero.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,zero.buffer);
-        vertices = [
-            0.0,numberHeight,
-            numberWidth/3,numberHeight*4/5,
-            numberWidth,numberHeight,
-            numberWidth*2/3,numberHeight*4/5,
-            numberWidth,0.0,
-            numberWidth*2/3,numberHeight/5,
-            0.0,0.0,
-            numberWidth/3,numberHeight/5,
-            0.0,numberHeight,
-            numberWidth/3,numberHeight*4/5
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-        zero.length = vertices.length/2;
-
-        one.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,one.buffer);
-        vertices = [
-            numberWidth*2/3,numberHeight,
-            numberWidth,numberHeight,
-            numberWidth*2/3,0.0,
-            numberWidth,0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-        one.length = vertices.length/2;
-
-
-        two.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,two.buffer);
-        vertices = [
-            0.0,numberHeight,
-            0.0,numberHeight*4/5,
-            numberWidth,numberHeight,
-            numberWidth*2/3,numberHeight*4/5,
-            numberWidth,numberHeight*2/5,
-            numberWidth*2/3,numberHeight*3/5,
-            numberWidth/3,numberHeight*2/5,
-            0.0,numberHeight*3/5,
-            numberWidth/3,numberHeight/5,
-            0.0,0.0,
-            numberWidth,numberHeight/5,
-            numberWidth,0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-        two.length = vertices.length/2;
-
-        three.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,three.buffer);
-        vertices = [
-            0.0,numberHeight,
-            0.0,numberHeight*4/5,
-            numberWidth,numberHeight,
-            numberWidth*2/3,numberHeight*4/5,
-            numberWidth,numberHeight*3/5,
-            numberWidth*2/3,numberHeight*2/5,
-            0.0,numberHeight*3/5,
-            0.0,numberHeight*2/5,
-            numberWidth*2/3,numberHeight*3/5,
-            numberWidth,numberHeight*2/5,
-            numberWidth,numberHeight*3/5,
-            numberWidth,numberHeight*2/5,
-            numberWidth*2/3,numberHeight/5,
-            numberWidth,0.0,
-            0.0,0.0,
-            0.0,numberHeight/5,
-            numberWidth*2/3,numberHeight/5
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-        three.length = vertices.length/2;
-
-        four.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,four.buffer);
-        vertices = [
-            numberWidth/3,numberHeight,
-            0.0,numberHeight,
-            numberWidth/3,numberHeight*3/5,
-            0.0,numberHeight*2/5,
-            numberWidth*2/3,numberHeight*2/5,
-            numberWidth*2/3,numberHeight*3/5,
-            numberWidth,numberHeight*3/5,
-            numberWidth,0.0,
-            numberWidth*2/3,0.0,
-            numberWidth,numberHeight,
-            numberWidth*2/3,numberHeight
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-        four.length = vertices.length/2;
-
-
-
+        for (let n of numbers){
+            n.length = n.coords.length/2;
+            n.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER,n.buffer);
+            gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(n.coords),gl.STATIC_DRAW);
+        }
 
         gl.bindBuffer(gl.ARRAY_BUFFER,null);
 
