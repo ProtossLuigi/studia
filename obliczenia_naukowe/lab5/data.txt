@@ -1,0 +1,160 @@
+3-element BenchmarkTools.BenchmarkGroup:
+  tags: []
+  "cond" => 2-element BenchmarkTools.BenchmarkGroup:
+	  tags: []
+	  "elimination" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  16.0 => Trial(1.694 ms)
+			  11.0 => Trial(1.651 ms)
+			  21.0 => Trial(1.702 ms)
+			  26.0 => Trial(1.685 ms)
+			  25.0 => Trial(1.710 ms)
+			  10.0 => Trial(1.654 ms)
+			  29.0 => Trial(1.704 ms)
+			  19.0 => Trial(1.700 ms)
+			  17.0 => Trial(1.699 ms)
+			  22.0 => Trial(1.700 ms)
+			  24.0 => Trial(1.703 ms)
+			  ⋮
+		  "withChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  16.0 => Trial(2.672 ms)
+			  11.0 => Trial(2.668 ms)
+			  21.0 => Trial(2.665 ms)
+			  26.0 => Trial(2.672 ms)
+			  25.0 => Trial(2.680 ms)
+			  10.0 => Trial(2.671 ms)
+			  29.0 => Trial(2.675 ms)
+			  19.0 => Trial(2.661 ms)
+			  17.0 => Trial(2.668 ms)
+			  22.0 => Trial(2.670 ms)
+			  24.0 => Trial(2.667 ms)
+			  ⋮
+	  "withLU" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  16.0 => Trial(1.793 ms)
+			  11.0 => Trial(1.788 ms)
+			  21.0 => Trial(1.797 ms)
+			  26.0 => Trial(1.795 ms)
+			  25.0 => Trial(1.788 ms)
+			  10.0 => Trial(1.785 ms)
+			  29.0 => Trial(1.793 ms)
+			  19.0 => Trial(1.791 ms)
+			  17.0 => Trial(1.784 ms)
+			  22.0 => Trial(1.787 ms)
+			  24.0 => Trial(1.787 ms)
+			  ⋮
+		  "withChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  16.0 => Trial(2.768 ms)
+			  11.0 => Trial(2.799 ms)
+			  21.0 => Trial(2.811 ms)
+			  26.0 => Trial(2.778 ms)
+			  25.0 => Trial(2.802 ms)
+			  10.0 => Trial(2.761 ms)
+			  29.0 => Trial(2.746 ms)
+			  19.0 => Trial(2.764 ms)
+			  17.0 => Trial(2.795 ms)
+			  22.0 => Trial(2.793 ms)
+			  24.0 => Trial(2.760 ms)
+			  ⋮
+  "l" => 2-element BenchmarkTools.BenchmarkGroup:
+	  tags: []
+	  "elimination" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 5-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  4 => Trial(1.162 ms)
+			  2 => Trial(379.299 μs)
+			  3 => Trial(708.800 μs)
+			  5 => Trial(1.697 ms)
+			  6 => Trial(2.338 ms)
+		  "withChoice" => 5-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  4 => Trial(1.732 ms)
+			  2 => Trial(419.399 μs)
+			  3 => Trial(934.300 μs)
+			  5 => Trial(2.683 ms)
+			  6 => Trial(3.686 ms)
+	  "withLU" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 5-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  4 => Trial(1.266 ms)
+			  2 => Trial(460.800 μs)
+			  3 => Trial(793.100 μs)
+			  5 => Trial(1.793 ms)
+			  6 => Trial(2.469 ms)
+		  "withChoice" => 5-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  4 => Trial(1.854 ms)
+			  2 => Trial(510.800 μs)
+			  3 => Trial(1.040 ms)
+			  5 => Trial(2.843 ms)
+			  6 => Trial(3.815 ms)
+  "n" => 2-element BenchmarkTools.BenchmarkGroup:
+	  tags: []
+	  "elimination" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  200 => Trial(311.001 μs)
+			  100 => Trial(154.600 μs)
+			  50 => Trial(86.599 μs)
+			  80 => Trial(126.499 μs)
+			  40 => Trial(73.699 μs)
+			  140 => Trial(213.900 μs)
+			  190 => Trial(292.600 μs)
+			  160 => Trial(244.600 μs)
+			  170 => Trial(260.799 μs)
+			  10 => Trial(10.820 μs)
+			  60 => Trial(99.800 μs)
+			  ⋮
+		  "withChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  200 => Trial(557.301 μs)
+			  100 => Trial(275.200 μs)
+			  50 => Trial(137.099 μs)
+			  80 => Trial(222.000 μs)
+			  40 => Trial(109.701 μs)
+			  140 => Trial(386.100 μs)
+			  190 => Trial(525.801 μs)
+			  160 => Trial(436.200 μs)
+			  170 => Trial(473.800 μs)
+			  10 => Trial(14.450 μs)
+			  60 => Trial(166.100 μs)
+			  ⋮
+	  "withLU" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: []
+		  "noChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  200 => Trial(334.200 μs)
+			  100 => Trial(168.499 μs)
+			  50 => Trial(96.100 μs)
+			  80 => Trial(139.201 μs)
+			  40 => Trial(83.299 μs)
+			  140 => Trial(232.199 μs)
+			  190 => Trial(315.699 μs)
+			  160 => Trial(264.899 μs)
+			  170 => Trial(282.099 μs)
+			  10 => Trial(23.301 μs)
+			  60 => Trial(111.100 μs)
+			  ⋮
+		  "withChoice" => 20-element BenchmarkTools.BenchmarkGroup:
+			  tags: []
+			  200 => Trial(583.300 μs)
+			  100 => Trial(291.301 μs)
+			  50 => Trial(146.501 μs)
+			  80 => Trial(231.200 μs)
+			  40 => Trial(119.501 μs)
+			  140 => Trial(405.300 μs)
+			  190 => Trial(558.900 μs)
+			  160 => Trial(461.700 μs)
+			  170 => Trial(491.801 μs)
+			  10 => Trial(26.800 μs)
+			  60 => Trial(178.901 μs)
+			  ⋮
