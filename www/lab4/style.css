@@ -1,0 +1,64 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url("xp1080.jpg");
+    background-repeat: repeat;
+    font-family: sans-serif;
+    color: black;
+    max-width: 1024px;
+    margin: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+#content {
+    background-color: cadetblue;
+    padding: 10px;
+    overflow: auto;
+    min-height: 100%;
+    flex-grow: 1;
+}
+
+img {
+    object-fit: contain;
+}
+
+@media only screen and (min-width: 800px) {
+    nav > ul {
+        flex-wrap: nowrap;
+    }
+
+    aside {
+        width: auto;
+        float: left;
+    }
+
+    article {
+        width: auto;
+    }
+
+    .info_table {
+        float: left;
+    }
+
+    .interest > img {
+        float: left;
+        margin-right: 10px;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    body {
+        border-style: solid;
+        border-color: #1c1c1c;
+        border-bottom: hidden;
+        border-top: hidden;
+    }
+}
