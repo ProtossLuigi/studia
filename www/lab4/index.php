@@ -212,7 +212,7 @@ dba_close($id);
                     Z własności symbolu Jacobiego wynika, że jeżeli $n$ nieparzyste oraz $a$ nieparzyste i w postaci $a=2^e a_1$, gdzie $a_1$ też nieparzyste to:
                 </p>
                 <p>\begin{equation}
-                    \left( \frac{a}{n} \right) = \left( \frac{2^e}{n} \right) \left( \frac{a_1}{n} \right) = \left( \frac{2}{n} \right) ^e \left( \frac{n \text{ mod } a_1}{a_1} \right) (-1)^{\frac{(a_1-1)(n-1)}{4}}
+                    \left( \frac{a}{n} \right) = \left( \frac{2^e}{n} \right) \left( \frac{a_1}{n} \right) = \left( \frac{2}{n} \right) ^e \left( \frac{n\mod a_1}{a_1} \right) (-1)^{\frac{(a_1-1)(n-1)}{4}}
                     \end{equation}</p>
             </section>
             <section id="1.7.3" class="section3">
