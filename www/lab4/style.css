@@ -50,6 +50,15 @@ nav > ul > li a {
     flex-grow: 1;
 }
 
+.comments {
+    border-width: 5px;
+    border-style: solid;
+    border-top-color: #3b3b3b;
+    border-bottom-color: #3b3b3b;
+    border-left: hidden;
+    border-right: hidden;
+}
+
 img {
     object-fit: contain;
 }
