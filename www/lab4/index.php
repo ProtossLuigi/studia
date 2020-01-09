@@ -1,0 +1,367 @@
+<?php
+require_once 'setup.php';
+
+session_name("login");
+session_start();
+setcookie(session_name(),session_id(),time() + 300);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
+    if ($_POST['type'] == 'login'){
+        $id = dba_open($users_path,"r","db4");
+        if ($_POST["password"] == dba_fetch($_POST["username"],$id)){
+            $_SESSION["registeredUser"] = $_POST["username"];
+        }
+        dba_close($id);
+    }
+    elseif ($_POST["type"] == "register"){
+        $id = dba_open($users_path,"w","db4");
+        if (dba_insert($_POST["username"],$_POST["password"],$id)){
+            $_SESSION["registeredUser"] = $_POST["username"];
+        }
+        dba_close($id);
+    }
+    elseif (isset($_POST["comment"]) && isset($_SESSION["registeredUser"])){
+        $id = dba_open($comments_path,"w","db4");
+        $num = 0;
+        while (dba_exists($_POST["section"]."/".$num."u",$id)){
+            $num++;
+        }
+        if (($old = dba_fetch($_POST["section"],$id)) == ""){
+            dba_replace($_POST["section"],$num,$id);
+        }
+        else {
+            dba_replace($_POST["section"],$old.";".$num,$id);
+        }
+        dba_insert($_POST["section"]."/".$num."u",$_SESSION["registeredUser"],$id);
+        dba_insert($_POST["section"]."/".$num."c",$_POST["comment"],$id);
+        dba_close($id);
+    }
+}
+
+$id = dba_open($visits_path,"w","db4");
+$count = dba_fetch('visits',$id);
+$visited = dba_fetch($_SERVER['REMOTE_ADDR'],$id);
+$now = new DateTime();
+if ($visited) {
+    $date = DateTime::createFromFormat(DATE_ATOM,$visited);
+    $expiration = (clone $now)->sub(new DateInterval('P1D'));
+    if ($date <= $expiration){
+        $count++;
+        dba_replace('visits',$count,$id);
+    }
+}
+dba_replace($_SERVER['REMOTE_ADDR'],$now->format(DATE_ATOM),$id);
+dba_close($id);
+?>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Zakamarki kryptografii</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.0/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+        };
+    </script>
+</head>
+<body>
+<a id="top"></a>
+<nav>
+    <ul>
+        <?php
+        if (isset($_SESSION["registeredUser"])){
+            echo "<li><a href=\"logout.php\">Wyloguj się</a></li>";
+        }
+        else{
+            echo "<li><a href=\"login.html\">Zaloguj / zarejestruj się</a></li>";
+        }
+        ?>
+    </ul>
+</nav>
+<div id="content">
+    <h1>Zakamarki kryptografii</h1>
+    <section class="section1">
+        <h2>1 Algorytm szyfrowania probabilistycznego Goldwasser-Micali</h2>
+        <section class="section2">
+            <h3>1.1 Wstęp</h3>
+            Do szyfrowania asymetrycznego potrzebujemy potrzebujemy 2 kluczy składających sie z pary liczb: klucza publicznego $(n,y)$ do szyfrowania i klucza prywatnego $(p,q)$ do odszyfrowywania.
+        </section>
+        <section class="section2">
+            <h3>1.2 Generowanie kluczy</h3>
+            <ul>
+                <li>Output: klucz publiczny, klucz prywatny</li>
+                <li>$p, q \leftarrow$ losowe duże liczby pierwsze</li>
+                <li>$n \leftarrow p*q$</li>
+                <li>Wybierz $y \in Z_n$, takie że $y$ jest nieresztą kwadratową modulo $n$ (<a href="#1.5">1.5</a>) i symbol Jacobiego (<a href="#1.7">1.7</a>) $(\frac{y}{n})=1$ (czyli $y$ jest pseudokwadratem modulo $n$)</li>
+                <li>klucz publiczny $\leftarrow (n,y)$</li>
+                <li>klucz prywatny $\leftarrow (p,q)$</li>
+            </ul>
+        </section>
+        <section class="section2">
+            <h3>1.3 Algorytm szyfrowania</h3>
+            <ul>
+                <li>Input: wiadomość $m$, kluucz publiczny $(n,y)$</li>
+                <li>Output: kryptogram $c$</li>
+                <li>Przedstaw $m$ w postaci łańcucha binarnego $m=m_1 m_2 ... m_t$</li>
+                <li>
+                    $\verb|For | i \verb| from | 1 \verb| to | t$
+                    <ul>
+                        <li>$\verb|wybierz losowe | x \in Z_n^*$</li>
+                        <li>$\verb|If | m_i=1 \verb| then set | c_i \leftarrow y*x^2$ $mod$ $n$</li>
+                        <li>$\verb|Otherwise set | c_i \leftarrow x^2$ $mod$ $n$</li>
+                    </ul>
+                </li>
+                <li>$c \leftarrow (c_1,c_2,...,c_t)$</li>
+            </ul>
+        </section>
+        <section class="section2">
+            <h3>1.4 Algorytm deszyfrowania</h3>
+            <ul>
+                <li>Input: kryptogram $c$, klucz prywatny $(p,q)$</li>
+                <li>Output: zdeszyfrowana wiadomość $m$</li>
+                <li>
+                    $\verb|For | i \verb| from | 1 \verb| to | t \verb| do|$
+                    <ul>
+                        <li>$\verb|policz symbol Legendre'a | e_i=(\frac{c_i}{p})$ (<a href="#1.6">1.6</a>)</li>
+                        <li>$\verb|If | e_i=1 \verb| then set | m_i \leftarrow 0$</li>
+                        <li>$\verb|Otherwise set | m_i \leftarrow 1$</li>
+                    </ul>
+                </li>
+                <li>$m \leftarrow m_1 m_2 ... m_t$</li>
+            </ul>
+        </section>
+        <section id="1.5" class="section2">
+            <h3>1.5 Reszta/niereszta kwadratowa</h3>
+            <section id="1.5.1" class="section3">
+                <h4>1.5.1 Definicja</h4>
+                <p>
+                    Niech $a \in Z_n$. Mówimy, że $a$ jest <i>resztą kwadratową modulo $n$ (kwadratem modulo $n$)</i>, jeżeli istnieje $x \in Z_n^*$ takie, że $x^3 \equiv a$ (mod $p$).
+                    Jeżeli takie $x$ nie istnieje, to wówczas $a$ nazywamy <i>nieresztą kwadratową modulo</i> $n$. Zbiór wszystkich reszt kwadratowych modulo $n$ oznaczamy $Q_n$, zaś zbiór wszystkich niereszt kwadratowych modulo $n$ oznaczamy $\overline{Q}_n$.
+                </p>
+            </section>
+        </section>
+        <section id="1.6" class="section2">
+            <h3>1.6 Symbol Legendre'a</h3>
+            <section id="1.6.1" class="section3">
+                <h4>1.6.1 Definicja</h4>
+                <p>
+                    Niech $p$ będzie nieparzystą liczbą pierwszą a $a$ liczbą całkowitą. <i>Symbol Legendre’a</i> $(\frac{a}{p})$ jest zdefiniowany jako:
+                </p>
+                <p>
+                    \begin{equation}
+                    \left(\frac{a}{p}\right)=
+                    \begin{cases}
+                    0  & \text{jeżeli } p|a &\\
+                    1  & \text{jeżeli } a \in Q_p\\
+                    -1 & \text{jeżeli } a \in {\overline{Q}_p}
+                    \end{cases}
+                    \end{equation}
+                </p>
+            </section>
+            <section id="1.6.2" class="section3">
+                <h4>1.6.2 Własności symbolu Legendre'a</h4>
+                <p>Niech $a,b \in Z$, zaś $p$ to nieparzysta liczba pierwsza. Wówczas</p>
+                <ul>
+                    <li>$(\frac{a}{p}) \equiv a^{\frac{p-1}{2}}$ (mod $p$)</li>
+                    <li>$(\frac{ab}{p}) = (\frac{a}{p})(\frac{b}{p})$</li>
+                    <li>$a \equiv b$ (mod $p$) $\implies (\frac{a}{p})=(\frac{b}{p})$</li>
+                    <li>$(\frac{2}{p}) = (-1)^\frac{p^2-1}{8}$</li>
+                    <li>
+                        <p>Jeżeli $q$ jest nieparzystą liczbą pierwszą inną od $p$ to:</p>
+                        <p>\begin{equation}
+                            \left(\frac{p}{q}\right) = \left(\frac{q}{p}\right)\left(-1\right)^{\frac{(p-1)(q-1)}{4}}
+                            \end{equation}</p>
+                    </li>
+                </ul>
+            </section>
+        </section>
+        <section id="1.7" class="section2">
+            <h3>1.7 Symbol Jacobiego</h3>
+            <section id="1.7.1" class="section3">
+                <h4>1.7.1 Definicja</h4>
+                <p>
+                    Niech $n \geq 3$ będzie liczbą nieparzystą a jej rozkład na czynniki pierwsze to $n = p_1^{e_1} p_2^{e_2} ... p_k^{e_k}$.
+                    <i>Symbol Jacobiego</i> $(\frac{a}{n})$ jest zdefiniowany jako:
+                </p>
+                <p>\begin{equation}
+                    \left(\frac{a}{n}\right) = \left(\frac{a}{p_1}\right)^{e_1} \left(\frac{a}{p_2}\right)^{e_2} ... \left(\frac{a}{p_k}\right)^{e_k}
+                    \end{equation}</p>
+                <p>
+                    Jeżeli $n$ jest liczbą pierwszą, to symbol Jacobiego jest symbolem Legendre'a.
+                </p>
+            </section>
+            <section id="1.7.2" class="section3">
+                <h4>1.7.2 Własności symbolu Jacobiego</h4>
+                <p>
+                    Niech $a,b \in Z$, zaś $m,n \geq 3$ to nieparzyste liczby całkowite. Wówczas:
+                </p>
+                <ul>
+                    <li>$(\frac{a}{n})=0,1,\text{albo}-1$. Ponadto $(\frac{a}{n})=0 \iff \text{gcd}(a,n) \neq 1$</li>
+                    <li>$(\frac{ab}{n})=(\frac{a}{n})(\frac{b}{n})$</li>
+                    <li>$(\frac{a}{mn})=(\frac{a}{m})(\frac{a}{n})$</li>
+                    <li>$a \equiv b$ (mod $n$) $\implies (\frac{a}{n})=(\frac{b}{n})$</li>
+                    <li>$(\frac{1}{n})=1$</li>
+                    <li>$(\frac{-1}{n})=(-1)^{\frac{n-1}{2}}$</li>
+                    <li>$(\frac{2}{n})=(-1)^{\frac{n^2-1}{8}}$</li>
+                    <li>$(\frac{m}{n})=(\frac{n}{m})(-1)^{\frac{(m-1)(n-1)}{4}}$</li>
+                </ul>
+                <p>
+                    Z własności symbolu Jacobiego wynika, że jeżeli $n$ nieparzyste oraz $a$ nieparzyste i w postaci $a=2^e a_1$, gdzie $a_1$ też nieparzyste to:
+                </p>
+                <p>\begin{equation}
+                    \left( \frac{a}{n} \right) = \left( \frac{2^e}{n} \right) \left( \frac{a_1}{n} \right) = \left( \frac{2}{n} \right) ^e \left( \frac{n \text{ mod } a_1}{a_1} \right) (-1)^{\frac{(a_1-1)(n-1)}{4}}
+                    \end{equation}</p>
+            </section>
+            <section id="1.7.3" class="section3">
+                <h4>1.7.3 Algorytm obliczania symbolu Jacobiego $(\frac{a}{n})$ (i Legendre'a)</h4>
+                <p>Dla nieparzystej liczby całkowitej $n \geq 3$ oraz całkowitego $0 \leq a < n$</p>
+                <p>$\verb|JACOBI|(a,n)$</p>
+                <ul>
+                    <li>$\verb|If | a=0 \verb| then return | 0$</li>
+                    <li>$\verb|If | a=1 \verb| then return | 1$</li>
+                    <li>$\verb|Write | a=2^e a_1 \verb|, gdzie | a_1 \verb| nieparzyste|$</li>
+                    <li>
+                        $\verb|If | e \verb| parzyste set | s \leftarrow 1$<br>
+                        $\verb|Otherwise set | s \leftarrow 1 \verb| if | n \equiv 1$ or $7$ (mod $8$), $\verb|or set | s \leftarrow -1 \verb| if | n \equiv 3$ or $5$ (mod $8$)
+                    </li>
+                    <li>$\verb|If | n \equiv 3$ (mod $4$) $\verb|and | a_1 \equiv 3$ (mod $4$) $\verb|then set | s \leftarrow -s$</li>
+                    <li>$\verb|Set | n_1 \leftarrow n$ mod $a_1$</li>
+                    <li>$\verb|If | a_1 = 1 \verb| then return | s$<br>
+                        $\verb|Otherwise return | s*\verb|JACOBI|(n_1,a_1)$
+                    </li>
+                </ul>
+                <p>Algorytm działa w czasie $O((log n)^2)$ operacji bitowych.</p>
+            </section>
+        </section>
+        <section class="comments">
+            <h3>Komentarze</h3>
+            <?php
+            $id = dba_open($comments_path,"r","db4");
+            $ids = dba_fetch("1",$id);
+            if (!$ids){
+                dba_insert("1","",$id);
+            }
+            elseif ($ids != ""){
+                $ids = explode(";",$ids);
+                foreach ($ids as $value){
+                    echo "<h4>" . dba_fetch("1/".$value."u",$id) . " napisał(a):" . "</h4>";
+                    echo "<p>" . dba_fetch("1/".$value."c",$id) . "</p>";
+                }
+            }
+            dba_close($id);
+            ?>
+            <form action="index.php" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="section" value="1">
+                <label>
+                    <h4>Nowy komentarz</h4>
+                    <textarea name="comment" style="width: 80%;height: 100px"></textarea>
+                </label>
+                <input type="submit" value="Wstaw komentarz">
+            </form>
+        </section>
+    </section>
+
+    <section id="2" class="section1">
+        <h2>2 Schemat progowy $(t,n)$ dzielenia sekretu Shamira</h2>
+        <section id="2.1" class="section2">
+            <h3>2.1 Cel</h3>
+            <p>Zaufana trzecia strona $T$ ma sekret $S \geq 0$, który chce podzielić pomiędzy $n$ uczestników tak, aby dowolnych $t$ spośród nich mogło sekret odtworzyć.</p>
+        </section>
+        <section id="2.2" class="section2">
+            <h3>2.2 Faza inicjalizacji</h3>
+            <ul>
+                <li>$T$ wybiera liczbę pierwszą $p > \text{max}(S,n)$ i definiuje $a_0 = S$</li>
+                <li>$T$ wybiera losowo i niezależnie $t-1$ współczynników $a_1,...,a_{t-1} \in Z_p</li>
+                <li>$T$ definiuje wielomian nad $Z_p$:
+                    \begin{equation}
+                    f(x) = a_0 + \sum_{j=1}^{t-1} a_j x^j
+                    \end{equation}
+                </li>
+                <li>Dla $1 \leq i \leq n$ zaufana trzecia strona $T$ wybiera losowo $x_i \in Z_p$, oblicza: $S_i = f(x_i) \text{ mod } p$ i bezpiecznie przekazuje parę $(x_i,S_i)$ użytkownikowi $P_i$.</li>
+            </ul>
+        </section>
+        <section id="2.3" class="section2">
+            <h3>2.3 Faza łączenia udziałów w sekret</h3>
+            <p>Dowolna grupa $t$ lub więcej użytkowników łączy swoje udziały - $t$ różnych punktów $(x_i,S_i)$ wielomianu $f$ i dzięki interpolacjij Lagrange'a odzyskuje sekret $S = a_0 = f(0)$.</p>
+        </section>
+        <section class="comments">
+            <h3>Komentarze</h3>
+            <?php
+            $id = dba_open($comments_path,"r","db4");
+            $ids = dba_fetch("2",$id);
+            if (!$ids){
+                dba_insert("2","",$id);
+            }
+            elseif ($ids != ""){
+                $ids = explode(";",$ids);
+                foreach ($ids as $value){
+                    echo "<h4>" . dba_fetch("2/".$value."u",$id) . " napisał(a):" . "</h4>";
+                    echo "<p>" . dba_fetch("2/".$value."c",$id) . "</p>";
+                }
+            }
+            dba_close($id);
+            ?>
+            <form action="index.php" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="section" value="2">
+                <label>
+                    <h4>Nowy komentarz</h4>
+                    <textarea name="comment" style="width: 80%;height: 100px"></textarea>
+                </label>
+                <input type="submit" value="Wstaw komentarz">
+            </form>
+        </section>
+    </section>
+    <section id="3" class="section1">
+        <h2>3 Interpolacja Lagrange'a</h2>
+        <section id="3.1" class="section2">
+            <h3>3.1</h3>
+            <p>Mając dane $t$ różnych punktów $(x_i,y_i)$ nieznanego wielomianu $f$ stopnia mniejszego od $t$ możemy policzyć jego współczynniki korzystając ze wzoru:</p>
+            <p>\begin{equation}
+                f(x) = \sum_{i=1}^t \left( y_i \prod_{1 \leq j \leq t, j \neq i} \frac{x-x_j}{x_j-x_i} \right) \text{ mod } p
+                \end{equation}</p>
+        </section>
+        <section id="3.2" class="section2">
+            <h3>3.2 Wskazówka</h3>
+            <p>W schemacie Shamira, aby odzyskać sekret $S$, użytkownicy nie muszą znać całego wielomianu $f$. Wstawiając do wzoru na interpolację Lagrange'a $x=0$, dostajemy wersję uproszczoną, ale wystarczającą aby policzyć sekret $S=f(0)$:</p>
+            <p>\begin{equation}
+                f(x) = \sum_{i=1}^t \left( y_i \prod_{1 \leq j \leq t, j \neq i} \frac{x_j}{x_j-x_i} \right) \text{ mod } p
+                \end{equation}</p>
+        </section>
+        <section class="comments">
+            <h3>Komentarze</h3>
+            <?php
+            $id = dba_open($comments_path,"r","db4");
+            $ids = dba_fetch("3",$id);
+            if (!$ids){
+                dba_insert("3","",$id);
+            }
+            elseif ($ids != ""){
+                $ids = explode(";",$ids);
+                foreach ($ids as $value){
+                    echo "<h4>" . dba_fetch("3/".$value."u",$id) . " napisał(a):" . "</h4>";
+                    echo "<p>" . dba_fetch("3/".$value."c",$id) . "</p>";
+                }
+            }
+            dba_close($id);
+            ?>
+            <form action="index.php" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="section" value="3">
+                <label>
+                    <h4>Nowy komentarz</h4>
+                    <textarea name="comment" style="width: 80%;height: 100px"></textarea>
+                </label>
+                <input type="submit" value="Wstaw komentarz">
+            </form>
+        </section>
+    </section>
+</div>
+<div id="visitCount">
+    <?php
+    echo "Liczba odwiedzin: " . $count;
+    ?>
+</div>
+</body>
+</html>
