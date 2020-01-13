@@ -1,18 +1,26 @@
 %code top{
     #include <iostream>
-    #include <unordered_map>
     #define RESERVED_SLOTS 7
 }
 %code requires{
     #include <string>
     #include <vector>
+    #include <unordered_map>
+
+    struct variable {
+        std::string     name;
+        long long       loc;
+        bool            arr = false;
+        long long       begin;
+        long long       end;
+    };
+
     struct YYSTYPE{
         long long       intval;
         std::string     str;
 
-        std::string     code;
         std::vector<std::pair<std::string,long long>>   instructions;
-        int             lines = 0;
+        std::unordered_map<std::string,struct variable> local_variables;
         bool            literal = false;
         bool            double_identifier = false;
         long long       second_identifier;
@@ -24,16 +32,10 @@
     extern FILE *yyin;
     extern FILE *yyout;
 
-    struct variable {
-        std::string     name;
-        long long       loc;
-        bool            arr = false;
-        long long       begin;
-        long long       end;
-    };
+    
 
     bool error = false;
-    long long no_variables = 0;
+    long long no_global_variables = 0;
     std::unordered_map<std::string,struct variable> global_variables;
 
     std::vector<std::pair<std::string,long long>> ll_to_instructions(long long x) {
@@ -96,6 +98,15 @@
         a.insert(a.end(),b.begin(),b.end());
         return a;
     }
+
+    void sync_local_vars(struct YYSTYPE &command1,struct YYSTYPE &command2) {
+        std::unordered_map<std::string,struct variable> new_local_variables = command1.local_variables;
+        int no_vars1 = command1.local_variables.size();
+        std::unordered_map<long long,long long> memory_changes;
+        for (auto it = command2.local_variables.begin(); it != command2.local_variables.end(); it++) {
+
+        }
+    }
 }
 %define api.value.type {struct YYSTYPE}
 %token num
@@ -127,24 +138,24 @@ program:          DECLARE declarations BEG commands END                         
                 | error                                                                         {yyerror(nullptr);}
 ;
 declarations:     declarations COMMA pidentifier                                                {
-                                                                                                struct variable new_var = {$3.str,no_variables+RESERVED_SLOTS,false,0,0};
+                                                                                                struct variable new_var = {$3.str,no_global_variables+RESERVED_SLOTS,false,0,0};
                                                                                                 global_variables.emplace(new_var.name,new_var);
-                                                                                                no_variables++;
+                                                                                                no_global_variables++;
                                                                                                 }
                 | declarations COMMA pidentifier LPAR num COLON num RPAR                        {
                                                                                                 struct variable new_var = {$3.str,RESERVED_SLOTS-$5.intval,true,$5.intval,$7.intval};
                                                                                                 global_variables.emplace(new_var.name,new_var);
-                                                                                                no_variables += new_var.end - new_var.begin + 1;
+                                                                                                no_global_variables += new_var.end - new_var.begin + 1;
                                                                                                 }
                 | pidentifier                                                                   {
                                                                                                 struct variable new_var = {$1.str,RESERVED_SLOTS,false,0,0};
                                                                                                 global_variables.emplace(new_var.name,new_var);
-                                                                                                no_variables = 1;
+                                                                                                no_global_variables = 1;
                                                                                                 }
                 | pidentifier LPAR num COLON num RPAR                                           {
                                                                                                 struct variable new_var = {$1.str,RESERVED_SLOTS-$3.intval,true,$3.intval,$5.intval};
                                                                                                 global_variables.emplace(new_var.name,new_var);
-                                                                                                no_variables = new_var.end - new_var.begin + 1;
+                                                                                                no_global_variables = new_var.end - new_var.begin + 1;
                                                                                                 }
 ;
 commands:         commands command                                                              {
@@ -168,10 +179,62 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                     $$.instructions.emplace_back("STORE",$1.intval);
                                                                                                 }
                                                                                                 }
-                | IF condition THEN commands ELSE commands ENDIF                                //TODO
-                | IF condition THEN commands ENDIF                                              //TODO
-                | WHILE condition DO commands ENDWHILE                                          //TODO
-                | DO commands WHILE condition ENDDO                                             //TODO
+                | IF condition THEN commands ELSE commands ENDIF                                {
+                                                                                                if ($2.literal) {
+                                                                                                    if ($2.intval) {
+                                                                                                        $$.instructions = $4.instructions;
+                                                                                                    } else {
+                                                                                                        $$.instructions = $6.instructions;
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $2.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$4.instructions.size()+2);
+                                                                                                    move_jumps(1,$4.instructions);
+                                                                                                    $$.instructions += $4.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$6.instructions.size()+1);
+                                                                                                    move_jumps($$.instructions.size(),$6.instructions);
+                                                                                                    $$.instructions += $6.instructions;
+                                                                                                }
+                                                                                                }
+                | IF condition THEN commands ENDIF                                              {
+                                                                                                if ($2.literal) {
+                                                                                                    if ($2.intval) {
+                                                                                                        $$.instructions = $4.instructions;
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $2.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$4.instructions.size()+1);
+                                                                                                    move_jumps(1,$4.instructions);
+                                                                                                    $$.instructions += $4.instructions;
+                                                                                                }
+                                                                                                }
+                | WHILE condition DO commands ENDWHILE                                          {
+                                                                                                if ($2.literal) {
+                                                                                                    if ($2.intval) {
+                                                                                                        $$.instructions = $4.instructions;
+                                                                                                        $$.instructions.emplace_back("JUMP",0);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $2.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$4.instructions.size()+2);
+                                                                                                    move_jumps($$.instructions.size(),$4.instructions);
+                                                                                                    $$.instructions += $4.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",0);
+                                                                                                }
+                                                                                                }
+                | DO commands WHILE condition ENDDO                                             {
+                                                                                                $$.instructions = $2.instructions;
+                                                                                                if ($4.literal) {
+                                                                                                    if ($4.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",0);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    move_jumps($$.instructions.size(),$4.instructions);
+                                                                                                    $$.instructions += $4.instructions;
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("JUMP",0);
+                                                                                                }
+                                                                                                }
                 | FOR pidentifier FROM value TO value DO commands ENDFOR                        //TODO
                 | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR                    //TODO
                 | READ identifier SEMICOLON                                                     {
@@ -280,7 +343,61 @@ expression:       value                                                         
                                                                                                 } else if ($1.literal && $3.literal) {
                                                                                                     $$.instructions = ll_to_instructions($1.intval / $3.intval);
                                                                                                 } else {
-                                                                                                    //TODO
+                                                                                                    $$.instructions.emplace_back("SUB",0);
+                                                                                                    $$.instructions.emplace_back("STORE",5);
+                                                                                                    $$.instructions += $3.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+$1.instructions.size()*2+47);
+                                                                                                    $$.instructions.emplace_back("STORE",4);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+$1.instructions.size()+23);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+$1.instructions.size()+44);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+11);
+                                                                                                    $$.instructions.emplace_back("INC",0);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+6);
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions.emplace_back("LOAD",5);
+                                                                                                    $$.instructions.emplace_back("INC",0);
+                                                                                                    $$.instructions.emplace_back("STORE",5);
+                                                                                                    $$.instructions.emplace_back("LOAD",3);
+                                                                                                    $$.instructions.emplace_back("SUB",4);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()-6);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$1.instructions.size()+35);
+                                                                                                    $$.instructions.emplace_back("DEC",0);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+6);
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions.emplace_back("LOAD",5);
+                                                                                                    $$.instructions.emplace_back("DEC",0);
+                                                                                                    $$.instructions.emplace_back("STORE",5);
+                                                                                                    $$.instructions.emplace_back("LOAD",3);
+                                                                                                    $$.instructions.emplace_back("ADD",4);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()-6);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$1.instructions.size()+25);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+22);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+11);
+                                                                                                    $$.instructions.emplace_back("INC",0);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+6);
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions.emplace_back("LOAD",5);
+                                                                                                    $$.instructions.emplace_back("DEC",0);
+                                                                                                    $$.instructions.emplace_back("STORE",5);
+                                                                                                    $$.instructions.emplace_back("LOAD",3);
+                                                                                                    $$.instructions.emplace_back("ADD",4);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()-6);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+13);
+                                                                                                    $$.instructions.emplace_back("DEC",0);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+6);
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions.emplace_back("LOAD",5);
+                                                                                                    $$.instructions.emplace_back("INC",0);
+                                                                                                    $$.instructions.emplace_back("STORE",5);
+                                                                                                    $$.instructions.emplace_back("LOAD",3);
+                                                                                                    $$.instructions.emplace_back("SUB",4);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()-6);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+3);
+                                                                                                    $$.instructions.emplace_back("SUB",0);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("LOAD",5);
                                                                                                 }
                                                                                                 }
                 | value MOD value                                                               {
@@ -293,16 +410,127 @@ expression:       value                                                         
                                                                                                     }
                                                                                                     $$.instructions = ll_to_instructions(val);
                                                                                                 } else {
-                                                                                                    //TODO
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+$1.instructions.size()*2+22);
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+$1.instructions.size()+11);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+$1.instructions.size()+19);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+6);
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()-1);
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+$1.instructions.size()+15);
+                                                                                                    $$.instructions.emplace_back("ADD",3);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$1.instructions.size()+13);
+                                                                                                    $$.instructions.emplace_back("ADD",3);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()-1);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+$1.instructions.size()+10);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+9);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+4);
+                                                                                                    $$.instructions.emplace_back("ADD",3);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()-1);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+5);
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()-1);
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("ADD",3);
                                                                                                 }
                                                                                                 }
 ;
-condition:        value EQ value                                                                //TODO
-                | value NEQ value                                                               //TODO
-                | value LE value                                                                //TODO
-                | value GE value                                                                //TODO
-                | value LEQ value                                                               //TODO
-                | value GEQ value                                                               //TODO
+condition:        value EQ value                                                                {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval == $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
+                | value NEQ value                                                               {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval != $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JZERO",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
+                | value LE value                                                                {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval < $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
+                | value GE value                                                                {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval > $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
+                | value LEQ value                                                               {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval <= $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JPOS",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
+                | value GEQ value                                                               {
+                                                                                                if ($1.literal && $2.literal) {
+                                                                                                    $$.literal = true;
+                                                                                                    $$.intval = $1.intval >= $2.intval;
+                                                                                                    if ($$.intval) {
+                                                                                                        $$.instructions.emplace_back("JUMP",2);
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    $$.instructions = $3.instructions;
+                                                                                                    $$.instructions.emplace_back("STORE",3);
+                                                                                                    $$.instructions += $1.instructions;
+                                                                                                    $$.instructions.emplace_back("SUB",3);
+                                                                                                    $$.instructions.emplace_back("JNEG",$$.instructions.size()+2);
+                                                                                                    $$.instructions.emplace_back("JUMP",$$.instructions.size()+2);
+                                                                                                }
+                                                                                                }
 ;
 value:            num                                                                           {
                                                                                                 $$.literal = true;
@@ -331,7 +559,7 @@ identifier:       pidentifier                                                   
                                                                                                     }
                                                                                                 } else {
                                                                                                     error = true;
-                                                                                                    std::string msg = "unknown variable '" + $1.str + "'"; //TODO
+                                                                                                    std::string msg = "undeclared variable '" + $1.str + "'"; //TODO
                                                                                                     yyerror(msg.c_str());
                                                                                                 }
                                                                                                 }
@@ -355,11 +583,11 @@ identifier:       pidentifier                                                   
                                                                                                 } else {
                                                                                                     error = true;
                                                                                                     if (!global_variables.count($1.str)) {
-                                                                                                        std::string msg = "unknown variable '" + $1.str + "'"; //TODO
+                                                                                                        std::string msg = "undeclared variable '" + $1.str + "'"; //TODO
                                                                                                         yyerror(msg.c_str());
                                                                                                     }
                                                                                                     if (!global_variables.count($3.str)) {
-                                                                                                        std::string msg = "unknown variable '" + $3.str + "'"; //TODO
+                                                                                                        std::string msg = "undeclared variable '" + $3.str + "'"; //TODO
                                                                                                         yyerror(msg.c_str());
                                                                                                     }
                                                                                                 }
@@ -382,7 +610,7 @@ identifier:       pidentifier                                                   
                                                                                                     }
                                                                                                 } else {
                                                                                                     error = true;
-                                                                                                    std::string msg = "unknown variable '" + $1.str + "'"; //TODO
+                                                                                                    std::string msg = "undeclared variable '" + $1.str + "'"; //TODO
                                                                                                     yyerror(msg.c_str());
                                                                                                 }
                                                                                                 }

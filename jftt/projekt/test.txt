@@ -3,6 +3,6 @@ DECLARE
 BEGIN
     READ a;
     READ b;
-    c ASSIGN a TIMES b;
+    c ASSIGN a MOD b;
     WRITE c;
 END
