@@ -10,9 +10,12 @@
     struct YYSTYPE{
         long long       intval;
         std::string     str;
+        int             lineno;
 
         std::vector<std::pair<std::string,std::string>>   instructions;
         std::unordered_map<std::string,bool> local_variables;
+        std::unordered_map<std::string,int> used_variables;
+        std::unordered_map<std::string,bool> initialized_variables;
         bool            literal = false;
         bool            double_identifier = false;
         long long       second_identifier;
@@ -106,11 +109,21 @@
         return m;
     }
 
-    void allocate_local_variables(std::vector<std::pair<std::string,std::string>> &instructions, std::unordered_map<std::string,bool> &local_variables) {
+    template <typename K,typename V> std::unordered_map<K,V> operator+=(std::unordered_map<K,V> &a, const std::unordered_map<K,V> &b) {
+        a.insert(b.begin(),b.end());
+        return a;
+    }
+
+    void print_error(int line,std::string message) {
+        message = "Error in line " + std::to_string(line) + ": " + message;
+        yyerror(message.c_str());
+    }
+
+    void allocate_local_variables(YYSTYPE &token) {
         long long memory_slot = RESERVED_SLOTS + no_global_variables;
-        for (std::unordered_map<std::string,bool>::iterator it = local_variables.begin(); it != local_variables.end(); it++) {
+        for (std::unordered_map<std::string,bool>::iterator it = token.local_variables.begin(); it != token.local_variables.end(); it++) {
             if (it->second) {
-                for (std::pair<std::string,std::string> &instr : instructions) {
+                for (std::pair<std::string,std::string> &instr : token.instructions) {
                     if (instr.second.compare(it->first) == 0) {
                         instr.second = std::to_string(memory_slot);
                     } else if (instr.second.compare(it->first + "+1") == 0) {
@@ -119,22 +132,34 @@
                 }
                 memory_slot += 2;
             } else {
-                error = true;
-                error_message += "Error: undeclared variable '" + it->first + "'\n"; //TODO
+                print_error(token.used_variables[it->first],"undeclared variable '" + it->first + "'");
             }
         }
     }
 
-    std::unordered_map<std::string,bool> sync_local_vars(std::unordered_map<std::string,bool> a,std::unordered_map<std::string,bool> b) {
+    void check_initializations(YYSTYPE &token) {
+        for (auto it = global_variables.begin(); it != global_variables.end(); it++) {
+            if (!it->second.arr && token.used_variables.count(it->first) && (!token.initialized_variables.count(it->first) || !token.initialized_variables[it->first])) {
+                print_error(token.used_variables[it->first],"uninitialized variable '" + it->first + "' used");
+            }
+        }
+    }
+
+    std::unordered_map<std::string,bool> sync_local_vars(YYSTYPE a,YYSTYPE b) {
         std::vector<std::string> faulty_vars;
-        for (auto it = a.begin(); it != a.end(); it++) {
-            if (b.count(it->first) && it->second != b[it->first]) {
-                error = true;
-                error_message += "Error: local variable '" + it->first + "' undeclared or used out of its scope";
+        for (auto it = a.local_variables.begin(); it != a.local_variables.end(); it++) {
+            if (b.local_variables.count(it->first) && it->second != b.local_variables[it->first]) {
+                int line;
+                if (it->second) {
+                    line = b.used_variables[it->first];
+                } else {
+                    line = a.used_variables[it->first];
+                }
+                print_error(line,"local variable '" + it->first + "' undeclared or used out of its scope");
                 faulty_vars.push_back(it->first);
             } 
         }
-        std::unordered_map<std::string,bool> m = a + b;
+        std::unordered_map<std::string,bool> m = a.local_variables + b.local_variables;
         for (std::string to_remove : faulty_vars) {
             m.erase(to_remove);
         }
@@ -142,6 +167,8 @@
     }
 }
 %define api.value.type {struct YYSTYPE}
+%define parse.error verbose
+%locations
 %token num
 %token pidentifier
 %token DECLARE BEG END
@@ -155,44 +182,55 @@
 %token WHILE ENDWHILE DO ENDDO FOR FROM TO DOWNTO ENDFOR
 %%
 program:          DECLARE declarations BEG commands END                                         {
+                                                                                                $$.used_variables = $4.used_variables;
+                                                                                                $$.initialized_variables = $4.initialized_variables;
                                                                                                 $$.local_variables = $4.local_variables;
                                                                                                 $$.instructions.emplace_back("SUB","0");
                                                                                                 $$.instructions.emplace_back("INC","");
                                                                                                 $$.instructions.emplace_back("STORE","1");
                                                                                                 move_jumps(3,$4.instructions);
                                                                                                 $$.instructions += $4.instructions;
-                                                                                                allocate_local_variables($$.instructions,$$.local_variables);
-                                                                                                if (error) {
-                                                                                                    std::cerr << error_message;
-                                                                                                } else {
+                                                                                                allocate_local_variables($$);
+                                                                                                check_initializations($$);
+                                                                                                if (!error) {
                                                                                                     print_instructions($$.instructions);
                                                                                                 }
                                                                                                 }
                 | BEG commands END                                                              {
+                                                                                                $$.used_variables = $2.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables;
                                                                                                 $$.local_variables = $2.local_variables;
                                                                                                 $$.instructions.emplace_back("SUB","0");
                                                                                                 $$.instructions.emplace_back("INC","");
                                                                                                 $$.instructions.emplace_back("STORE","1");
                                                                                                 move_jumps(3,$2.instructions);
                                                                                                 $$.instructions += $2.instructions;
-                                                                                                allocate_local_variables($$.instructions,$$.local_variables);
-                                                                                                if (error) {
-                                                                                                    std::cerr << error_message;
-                                                                                                } else {
+                                                                                                allocate_local_variables($$);
+                                                                                                check_initializations($$);
+                                                                                                if (!error) {
                                                                                                     print_instructions($$.instructions);
                                                                                                 }
                                                                                                 }
-                | error                                                                         {yyerror(nullptr);}
 ;
 declarations:     declarations COMMA pidentifier                                                {
-                                                                                                struct global_variable new_var = {$3.str,no_global_variables+RESERVED_SLOTS,false,0,0};
-                                                                                                global_variables.emplace(new_var.name,new_var);
-                                                                                                no_global_variables++;
+                                                                                                if (global_variables.count($3.str)) {
+                                                                                                    print_error($3.lineno,"variable '" + $3.str + "' declared multiple times");
+                                                                                                } else {
+                                                                                                    struct global_variable new_var = {$3.str,no_global_variables+RESERVED_SLOTS,false,0,0};
+                                                                                                    global_variables.emplace(new_var.name,new_var);
+                                                                                                    no_global_variables++;
+                                                                                                }
                                                                                                 }
                 | declarations COMMA pidentifier LPAR num COLON num RPAR                        {
-                                                                                                struct global_variable new_var = {$3.str,RESERVED_SLOTS-$5.intval,true,$5.intval,$7.intval};
-                                                                                                global_variables.emplace(new_var.name,new_var);
-                                                                                                no_global_variables += new_var.end - new_var.begin + 1;
+                                                                                                if (global_variables.count($3.str)) {
+                                                                                                    print_error($3.lineno,"variable '" + $2.str + "' declared multiple times");
+                                                                                                } else if ($5.intval > $7.intval) {
+                                                                                                    print_error($5.lineno,"invalid array bounds");
+                                                                                                } else {
+                                                                                                    struct global_variable new_var = {$3.str,RESERVED_SLOTS-$5.intval,true,$5.intval,$7.intval};
+                                                                                                    global_variables.emplace(new_var.name,new_var);
+                                                                                                    no_global_variables += new_var.end - new_var.begin + 1;
+                                                                                                }
                                                                                                 }
                 | pidentifier                                                                   {
                                                                                                 struct global_variable new_var = {$1.str,RESERVED_SLOTS,false,0,0};
@@ -200,30 +238,46 @@ declarations:     declarations COMMA pidentifier                                
                                                                                                 no_global_variables = 1;
                                                                                                 }
                 | pidentifier LPAR num COLON num RPAR                                           {
-                                                                                                struct global_variable new_var = {$1.str,RESERVED_SLOTS-$3.intval,true,$3.intval,$5.intval};
-                                                                                                global_variables.emplace(new_var.name,new_var);
-                                                                                                no_global_variables = new_var.end - new_var.begin + 1;
+                                                                                                if ($3.intval > $5.intval) {
+                                                                                                    print_error($3.lineno,"invalid array bounds");
+                                                                                                } else {
+                                                                                                    struct global_variable new_var = {$1.str,RESERVED_SLOTS-$3.intval,true,$3.intval,$5.intval};
+                                                                                                    global_variables.emplace(new_var.name,new_var);
+                                                                                                    no_global_variables = new_var.end - new_var.begin + 1;
+                                                                                                }
                                                                                                 }
 ;
 commands:         commands command                                                              {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$2.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $2.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$2);
                                                                                                 move_jumps($1.instructions.size(),$2.instructions);
                                                                                                 $$.instructions = $1.instructions + $2.instructions;
                                                                                                 }
                 | command                                                                       {
                                                                                                 $$.local_variables = $1.local_variables;
+                                                                                                $$.used_variables = $1.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables;
                                                                                                 $$.instructions = $1.instructions;
                                                                                                 }
 ;
 command:          identifier ASSIGN expression SEMICOLON                                        {
+                                                                                                $$.lineno = $1.lineno;
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
                                                                                                 $$.local_variables = $3.local_variables;
-                                                                                                if ($1.local_var) {
-                                                                                                    error = true;
-                                                                                                    error_message += "Error: cannot assign local or undeclared variable '" + $1.str + "'\n"; //TODO
+                                                                                                if ($1.local_var && !$1.double_identifier) {
+                                                                                                    print_error($1.lineno,"cannot assign local or undeclared variable '" + $1.str + "'");
+                                                                                                } else if (!$1.local_var && !$1.double_identifier) {
+                                                                                                    $$.initialized_variables[$1.str] = true;
                                                                                                 }
+                                                                                                $$.initialized_variables += $3.initialized_variables;
                                                                                                 if ($1.double_identifier) {
                                                                                                     $$.instructions = ll_to_instructions($1.intval);
-                                                                                                    $$.instructions.emplace_back("ADD",std::to_string($1.second_identifier));
+                                                                                                    if ($1.local_var) {
+                                                                                                        $$.instructions.emplace_back("ADD",$1.str);
+                                                                                                    } else {
+                                                                                                        $$.instructions.emplace_back("ADD",std::to_string($1.second_identifier));
+                                                                                                    }
                                                                                                     $$.instructions.emplace_back("STORE","2");
                                                                                                     move_jumps($$.instructions.size(),$3.instructions);
                                                                                                     $$.instructions += $3.instructions;
@@ -234,7 +288,10 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | IF condition THEN commands ELSE commands ENDIF                                {
-                                                                                                $$.local_variables = sync_local_vars($2.local_variables,sync_local_vars($4.local_variables,$6.local_variables));
+                                                                                                $$.used_variables = $2.used_variables + $4.used_variables + $6.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables + $4.initialized_variables + $6.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($2,$4);
+                                                                                                $$.local_variables = sync_local_vars($$,$6);
                                                                                                 if ($2.literal) {
                                                                                                     if ($2.intval) {
                                                                                                         $$.instructions = $4.instructions;
@@ -252,7 +309,9 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | IF condition THEN commands ENDIF                                              {
-                                                                                                $$.local_variables = sync_local_vars($2.local_variables,$4.local_variables);
+                                                                                                $$.used_variables = $2.used_variables + $4.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables + $4.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($2,$4);
                                                                                                 if ($2.literal) {
                                                                                                     if ($2.intval) {
                                                                                                         $$.instructions = $4.instructions;
@@ -265,7 +324,9 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | WHILE condition DO commands ENDWHILE                                          {
-                                                                                                $$.local_variables = sync_local_vars($2.local_variables,$4.local_variables);
+                                                                                                $$.used_variables = $2.used_variables + $4.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables + $4.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($2,$4);
                                                                                                 if ($2.literal) {
                                                                                                     if ($2.intval) {
                                                                                                         $$.instructions = $4.instructions;
@@ -280,7 +341,9 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | DO commands WHILE condition ENDDO                                             {
-                                                                                                $$.local_variables = sync_local_vars($2.local_variables,$4.local_variables);
+                                                                                                $$.used_variables = $2.used_variables + $4.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables + $4.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($2,$4);
                                                                                                 $$.instructions = $2.instructions;
                                                                                                 if ($4.literal) {
                                                                                                     if ($4.intval) {
@@ -294,14 +357,16 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | FOR pidentifier FROM value TO value DO commands ENDFOR                        {
-                                                                                                $$.local_variables = sync_local_vars(sync_local_vars($4.local_variables,$6.local_variables),$8.local_variables);
+                                                                                                $$.used_variables[$2.str] = $2.lineno;
+                                                                                                $$.used_variables = $$.used_variables + $4.used_variables + $6.used_variables + $8.used_variables;
+                                                                                                $$.initialized_variables = $4.initialized_variables + $6.initialized_variables + $8.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($4,$6);
+                                                                                                $$.local_variables = sync_local_vars($$,$8);
                                                                                                 if ($$.local_variables[$2.str] || global_variables.count($2.str)) {
-                                                                                                    error = true;
-                                                                                                    error_message += "Error: variable '" + $2.str + "' declared multiple times\n"; //TODO
+                                                                                                    print_error($2.lineno,"variable '" + $2.str + "' declared multiple times");
                                                                                                 } else {
                                                                                                     if ($4.literal && $6.literal && $4.intval > $6.intval) {
-                                                                                                        error = true;
-                                                                                                        error_message += "Error: invalid for loop bounds\n"; //TODO
+                                                                                                        print_error($4.lineno,"invalid for loop bounds");
                                                                                                     } else {
                                                                                                         $$.local_variables[$2.str] = true;
                                                                                                         $$.instructions = $6.instructions;
@@ -319,14 +384,16 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR                    {
-                                                                                                $$.local_variables = sync_local_vars(sync_local_vars($4.local_variables,$6.local_variables),$8.local_variables);
+                                                                                                $$.used_variables[$2.str] = $2.lineno;
+                                                                                                $$.used_variables = $$.used_variables + $4.used_variables + $6.used_variables + $8.used_variables;
+                                                                                                $$.initialized_variables = $4.initialized_variables + $6.initialized_variables + $8.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($4,$6);
+                                                                                                $$.local_variables = sync_local_vars($$,$8);
                                                                                                 if ($$.local_variables[$2.str] || global_variables.count($2.str)) {
-                                                                                                    error = true;
-                                                                                                    error_message += "Error: variable '" + $2.str + "' declared multiple times\n"; //TODO
+                                                                                                    print_error($2.lineno,"variable '" + $2.str + "' declared multiple times");
                                                                                                 } else {
                                                                                                     if ($4.literal && $6.literal && $4.intval < $6.intval) {
-                                                                                                        error = true;
-                                                                                                        error_message += "Error: invalid for loop bounds\n"; //TODO
+                                                                                                        print_error($4.lineno,"invalid for loop bounds");
                                                                                                     } else {
                                                                                                         $$.local_variables[$2.str] = true;
                                                                                                         $$.instructions = $6.instructions;
@@ -344,6 +411,7 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                                                                                                 }
                 | READ identifier SEMICOLON                                                     {
+                                                                                                $$.used_variables = $2.used_variables;
                                                                                                 if ($2.double_identifier) {
                                                                                                     if ($2.local_var) {
                                                                                                         $$.local_variables.emplace($2.str,false);
@@ -361,17 +429,19 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                     }
                                                                                                 } else {
                                                                                                     if ($2.local_var) {
-                                                                                                        error = true;
-                                                                                                        error_message += "Error: cannot assign local or undeclared variable '" + $1.str + "'\n"; //TODO
+                                                                                                        print_error($2.lineno,"cannot assign local or undeclared variable '" + $2.str + "'");
                                                                                                     } else {
                                                                                                         $$.instructions.emplace_back("GET","0");
                                                                                                         $$.instructions.emplace_back("STORE",std::to_string($2.intval));
+                                                                                                        $$.initialized_variables[$2.str] = true;
                                                                                                     }
                                                                                                     
                                                                                                 }
                                                                                                 }
                 | WRITE value SEMICOLON                                                         {
                                                                                                 $$.local_variables = $2.local_variables;
+                                                                                                $$.used_variables = $2.used_variables;
+                                                                                                $$.initialized_variables = $2.initialized_variables;
                                                                                                 $$.instructions = $2.instructions;
                                                                                                 $$.instructions.emplace_back("PUT","0");
                                                                                                 }
@@ -380,7 +450,9 @@ expression:       value                                                         
                                                                                                 $$ = $1;
                                                                                                 }
                 | value PLUS value                                                              {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $3.literal) {
                                                                                                     $$.instructions = ll_to_instructions($1.intval + $3.intval);
                                                                                                 } else {
@@ -391,7 +463,9 @@ expression:       value                                                         
                                                                                                 }
                                                                                                 }
                 | value MINUS value                                                             {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $3.literal) {
                                                                                                     $$.instructions = ll_to_instructions($1.intval - $3.intval);
                                                                                                 } else {
@@ -402,7 +476,9 @@ expression:       value                                                         
                                                                                                 }
                                                                                                 }
                 | value TIMES value                                                             {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $3.literal) {
                                                                                                     $$.instructions = ll_to_instructions($1.intval * $3.intval);
                                                                                                 } else {
@@ -463,7 +539,9 @@ expression:       value                                                         
                                                                                                 }
                                                                                                 }
                 | value DIV value                                                               {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($3.literal && $3.intval == 0) {
                                                                                                     $$.instructions.emplace_back("SUB","0");
                                                                                                 } else if ($1.literal && $3.literal) {
@@ -527,7 +605,9 @@ expression:       value                                                         
                                                                                                 }
                                                                                                 }
                 | value MOD value                                                               {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($3.literal && $3.intval == 0) {
                                                                                                     $$.instructions.emplace_back("SUB","0");
                                                                                                 } else if ($1.literal && $3.literal) {
@@ -566,7 +646,9 @@ expression:       value                                                         
                                                                                                 }
 ;
 condition:        value EQ value                                                                {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval == $2.intval;
@@ -582,7 +664,9 @@ condition:        value EQ value                                                
                                                                                                 }
                                                                                                 }
                 | value NEQ value                                                               {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval != $2.intval;
@@ -599,7 +683,9 @@ condition:        value EQ value                                                
                                                                                                 }
                                                                                                 }
                 | value LE value                                                                {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval < $2.intval;
@@ -615,7 +701,9 @@ condition:        value EQ value                                                
                                                                                                 }
                                                                                                 }
                 | value GE value                                                                {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval > $2.intval;
@@ -631,7 +719,9 @@ condition:        value EQ value                                                
                                                                                                 }
                                                                                                 }
                 | value LEQ value                                                               {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval <= $2.intval;
@@ -648,7 +738,9 @@ condition:        value EQ value                                                
                                                                                                 }
                                                                                                 }
                 | value GEQ value                                                               {
-                                                                                                $$.local_variables = sync_local_vars($1.local_variables,$3.local_variables);
+                                                                                                $$.used_variables = $1.used_variables + $3.used_variables;
+                                                                                                $$.initialized_variables = $1.initialized_variables + $2.initialized_variables;
+                                                                                                $$.local_variables = sync_local_vars($1,$3);
                                                                                                 if ($1.literal && $2.literal) {
                                                                                                     $$.literal = true;
                                                                                                     $$.intval = $1.intval >= $2.intval;
@@ -666,11 +758,17 @@ condition:        value EQ value                                                
                                                                                                 }
 ;
 value:            num                                                                           {
+                                                                                                $$.lineno = $1.lineno;
                                                                                                 $$.literal = true;
                                                                                                 $$.intval = $1.intval;
                                                                                                 $$.instructions = ll_to_instructions($$.intval);
                                                                                                 }
                 | identifier                                                                    {
+                                                                                                $$.lineno = $1.lineno;
+                                                                                                $$.used_variables = $1.used_variables;
+                                                                                                if ($1.str.compare("") != 0) {
+                                                                                                    $$.initialized_variables[$1.str] = false;
+                                                                                                }
                                                                                                 if ($1.double_identifier) {
                                                                                                     if ($1.local_var) {
                                                                                                         $$.instructions = ll_to_instructions($1.intval);
@@ -692,29 +790,31 @@ value:            num                                                           
                                                                                                 }
 ;
 identifier:       pidentifier                                                                   {
+                                                                                                $$.lineno = $1.lineno;
+                                                                                                $$.str = $1.str;
+                                                                                                $$.used_variables[$$.str] = $$.lineno;
                                                                                                 if (global_variables.count($1.str)) {
                                                                                                     struct global_variable var = global_variables[$1.str];
                                                                                                     if (!var.arr) {
                                                                                                         $$.intval = global_variables[$1.str].loc;
                                                                                                     } else {
-                                                                                                        error = true;
-                                                                                                        error_message += "variable '" + var.name + "' is an array"; //TODO
+                                                                                                        print_error($1.lineno,"variable '" + var.name + "' is an array");
                                                                                                     }
                                                                                                 } else {
                                                                                                     $$.local_var = true;
-                                                                                                    $$.str = $1.str;
                                                                                                 }
                                                                                                 }
                 | pidentifier LPAR pidentifier RPAR                                             {
+                                                                                                $$.lineno = $1.lineno;
+                                                                                                $$.str = $3.str;
+                                                                                                $$.used_variables[$$.str] = $3.lineno;
                                                                                                 if (global_variables.count($1.str) && global_variables.count($3.str)) {
                                                                                                     struct global_variable var1 = global_variables[$1.str];
                                                                                                     struct global_variable var2 = global_variables[$3.str];
                                                                                                     if (!var1.arr) {
-                                                                                                        error = true;
-                                                                                                        error_message += "variable '" + var1.name + "' not an array"; //TODO
+                                                                                                        print_error($1.lineno,"variable '" + var1.name + "' not an array");
                                                                                                     } else if (var2.arr) {
-                                                                                                        error = true;
-                                                                                                        error_message += "variable '" + var2.name + "' is an array"; //TODO
+                                                                                                        print_error($3.lineno,"variable '" + var2.name + "' is an array");
                                                                                                     } else {
                                                                                                         $$.double_identifier = true;
                                                                                                         $$.intval = var1.loc;
@@ -724,40 +824,36 @@ identifier:       pidentifier                                                   
                                                                                                     $$.double_identifier = true;
                                                                                                     $$.intval = global_variables[$1.str].loc;
                                                                                                     $$.local_var = true;
-                                                                                                    $$.str = $3.str;
                                                                                                 } else {
-                                                                                                    error = true;
-                                                                                                    error_message += "Error: undeclared array '" + $1.str + "'"; //TODO
+                                                                                                    print_error($1.lineno,"undeclared array '" + $1.str + "'");
                                                                                                 }
                                                                                                 }
                 | pidentifier LPAR num RPAR                                                     {
+                                                                                                $$.lineno = $1.lineno;
                                                                                                 if (global_variables.count($1.str)) {
                                                                                                     struct global_variable var = global_variables[$1.str];
                                                                                                     if (var.arr) {
                                                                                                         if ($3.intval >= var.begin && $3.intval <= var.end) {
                                                                                                             $$.intval = var.loc + $3.intval;
                                                                                                         } else {
-                                                                                                            error = true;
-                                                                                                            std::string msg = "array index out of bounds '" + $1.str + "(" + std::to_string($3.intval) + ")'"; //TODO
-                                                                                                            yyerror(msg.c_str());
+                                                                                                            print_error($3.lineno,"array index out of bounds '" + $1.str + "(" + std::to_string($3.intval) + ")'");
                                                                                                         }
                                                                                                     } else {
-                                                                                                        error = true;
-                                                                                                        error_message += "variable '" + $1.str + "' not an array"; //TODO
+                                                                                                        print_error($1.lineno,"variable '" + $1.str + "' not an array");
                                                                                                     }
                                                                                                 } else {
-                                                                                                    error = true;
-                                                                                                    error_message += "undeclared array variable '" + $1.str + "'"; //TODO
+                                                                                                    print_error($1.lineno,"undeclared array variable '" + $1.str + "'");
                                                                                                 }
                                                                                                 }
 ;
 %%
 
 int yyerror(const char* s){
+    error = true;
     if (s == nullptr){
-        std::cerr << "Syntax error" << std::endl;
+        fprintf(stderr,"Error\n");
     } else {
-        std::cerr << "Error: " << std::string(s) << std::endl;
+        fprintf(stderr,"%s\n",s);
     }
 }
 
