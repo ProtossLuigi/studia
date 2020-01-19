@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>plotting</title>
+</head>
+<body style="margin: 0;padding: 0">
+<form>
+    <label for="fInput">f(x,y) = </label>
+    <input id="fInput" type="text" value="'5 * Math.sin(x) + 5 * Math.sin(y)'"><br>
+    <label for="xMin">x >= </label>
+    <input id="xMin" type="number" step="any" value="-3"><br>
+    <label for="xMax">x <= </label>
+    <input id="xMax" type="number" step="any" value="3"><br>
+    <label for="yMin">y >= </label>
+    <input id="yMin" type="number" step="any" value="-3"><br>
+    <label for="yMax">y <= </label>
+    <input id="yMax" type="number" step="any" value="3"><br>
+</form>
+<canvas id="mainCanvas" width="900" height="900" style="float: left"></canvas>
+<script src="plotting_script.js"></script>
+</body>
+</html>
