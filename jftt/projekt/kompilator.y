@@ -114,6 +114,18 @@
         return a;
     }
 
+    template <typename K,typename V> void remove_values(std::unordered_map<K,V> &m, V val) {
+        std::vector<K> to_remove;
+        for (auto it = m.begin(); it != m.end(); it++) {
+            if (it->second == val) {
+                to_remove.push_back(it->first);
+            }
+        }
+        for (K rem : to_remove){
+            m.erase(rem);
+        }
+    }
+
     void print_error(int line,std::string message) {
         message = "Error in line " + std::to_string(line) + ": " + message;
         yyerror(message.c_str());
@@ -267,7 +279,7 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 $$.local_variables = $3.local_variables;
                                                                                                 if ($1.local_var && !$1.double_identifier) {
                                                                                                     print_error($1.lineno,"cannot assign local or undeclared variable '" + $1.str + "'");
-                                                                                                } else if (!$1.local_var && !$1.double_identifier) {
+                                                                                                } else if (!$1.local_var && !$1.double_identifier && !$3.initialized_variables.count($1.str)) {
                                                                                                     $$.initialized_variables[$1.str] = true;
                                                                                                 }
                                                                                                 $$.initialized_variables += $3.initialized_variables;
@@ -289,6 +301,8 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                 | IF condition THEN commands ELSE commands ENDIF                                {
                                                                                                 $$.used_variables = $2.used_variables + $4.used_variables + $6.used_variables;
+                                                                                                remove_values($4.initialized_variables,false);
+                                                                                                remove_values($6.initialized_variables,false);
                                                                                                 $$.initialized_variables = $2.initialized_variables + $4.initialized_variables + $6.initialized_variables;
                                                                                                 $$.local_variables = sync_local_vars($2,$4);
                                                                                                 $$.local_variables = sync_local_vars($$,$6);
@@ -310,6 +324,7 @@ command:          identifier ASSIGN expression SEMICOLON                        
                                                                                                 }
                 | IF condition THEN commands ENDIF                                              {
                                                                                                 $$.used_variables = $2.used_variables + $4.used_variables;
+                                                                                                remove_values($4.initialized_variables,false);
                                                                                                 $$.initialized_variables = $2.initialized_variables + $4.initialized_variables;
                                                                                                 $$.local_variables = sync_local_vars($2,$4);
                                                                                                 if ($2.literal) {

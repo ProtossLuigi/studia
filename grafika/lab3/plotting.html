@@ -7,7 +7,7 @@
 <body style="margin: 0;padding: 0">
 <form>
     <label for="fInput">f(x,y) = </label>
-    <input id="fInput" type="text" value="'5 * Math.sin(x) + 5 * Math.sin(y)'"><br>
+    <input id="fInput" type="text" value="5 * Math.sin(x) + 5 * Math.sin(y)"><br>
     <label for="xMin">x >= </label>
     <input id="xMin" type="number" step="any" value="-3"><br>
     <label for="xMax">x <= </label>
@@ -16,6 +16,12 @@
     <input id="yMin" type="number" step="any" value="-3"><br>
     <label for="yMax">y <= </label>
     <input id="yMax" type="number" step="any" value="3"><br>
+    <label for="plotTypeT">Styl wykresu</label><br>
+    <input id="plotTypeT" type="radio" name="plotType" value="TRIANGLE_STRIP" checked>TRIANGLE_STRIP<br>
+    <input id="plotTypeP" type="radio" name="plotType" value="POINTS">POINTS<br>
+    <label for="ambient">ambient strength =</label>
+    <input id="ambient" type="number" step="any" value="1"><br>
+    <input id="diffuse" type="checkbox" checked><label for="diffuse">diffuse</label>
 </form>
 <canvas id="mainCanvas" width="900" height="900" style="float: left"></canvas>
 <script src="plotting_script.js"></script>

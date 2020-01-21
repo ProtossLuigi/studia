@@ -6,6 +6,7 @@ uniform vec3 transform;
 uniform mat4 projection;
 uniform mat4 rotation;
 uniform vec3 move;
+uniform float size;
 
 varying vec3 vcoords;
 varying vec3 vnormals;
@@ -17,6 +18,7 @@ void main(void) {
 
     vpos = rotation * vec4(coords + transform, 1.0) + vec4(move, 0.0);
     gl_Position =  projection * vpos;
+    gl_PointSize = size;
 }
 `;
 
@@ -70,13 +72,15 @@ let xMinInput = document.querySelector('#xMin');
 let xMaxInput = document.querySelector('#xMax');
 let yMinInput = document.querySelector('#yMin');
 let yMaxInput = document.querySelector('#yMax');
+let radio1 = document.querySelector('#plotTypeT');
+let ambientInput = document.querySelector('#ambient');
+let diffuseToggle = document.querySelector('#diffuse');
 
 let textureCoordBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 let textureCoordinates = [ 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0 ];
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl.STATIC_DRAW);
 
-// graphical plot graphPlotect to draw
 class GraphicalPlot {
     constructor(verts, norms, x = 0, y = 0, z = 0, r = 1, g = 1, b = 1) {
         this.x = x;
@@ -96,7 +100,6 @@ class GraphicalPlot {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
-    // draw graphical graphPlotect
     draw() {
         gl.useProgram(program);
 
@@ -121,6 +124,11 @@ class GraphicalPlot {
         gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
         gl.uniform1f(gl.getUniformLocation(program, "fog"), fogLevel);
+        if (drawStyle === 0) {
+            gl.uniform1f(gl.getUniformLocation(program,"size"),1.);
+        } else {
+            gl.uniform1f(gl.getUniformLocation(program,"size"),0.);
+        }
 
         gl.uniform3f(gl.getUniformLocation(program, 'ambient'), ...ambient);
         gl.uniform1f(gl.getUniformLocation(program, "strength"), strength);
@@ -134,7 +142,6 @@ class GraphicalPlot {
     }
 }
 
-// compile vertex shader
 let vertShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertShader, VertGLSL);
 gl.compileShader(vertShader);
@@ -142,7 +149,6 @@ if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
     console.error("VERT COMPILE ERROR:\n", gl.getShaderInfoLog(vertShader));
 }
 
-// compile fragment shader
 let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragShader, FragGLSL);
 gl.compileShader(fragShader);
@@ -150,7 +156,6 @@ if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
     console.error("FRAG COMPILE ERROR:\n", gl.getShaderInfoLog(fragShader));
 }
 
-// create program
 let program = gl.createProgram();
 gl.attachShader(program, vertShader);
 gl.attachShader(program, fragShader);
@@ -159,18 +164,17 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error("LINK ERROR:\n", gl.getProgramInfoLog(program));
 }
 
-let f = (x, y) => 5 * Math.sin(x) + 5 * Math.sin(y); // default function
-let rangeX = [ -3, 3 ]; // default range
+let f = (x, y) => 5 * Math.sin(x) + 5 * Math.sin(y);
+let rangeX = [ -3, 3 ];
 let rangeY = [ -3, 3];
-let graphPlot, projectionMatrix, rotationMatrix, fogLevel = 5; // defaults
+let graphPlot, projectionMatrix, rotationMatrix, fogLevel = 5;
 
-let DrawStyles = [ "POINTS", "LINE_STRIP", "TRIANGLE_STRIP" ]; // drawing styles to select
-let drawStyle = 2; // default style
-let ambient = [ 1, 1, 1 ]; // default ambient
-let strength = 2; // ambient strength
-let diffuse = true; // default diffuse on
+let DrawStyles = [ "POINTS", "TRIANGLE_STRIP" ];
+let drawStyle = 1;
+let ambient = [ 1, 1, 1 ];
+let strength = 1;
+let diffuse = true;
 
-// operations on vector
 let vec = {
     add : (v1, v2) => [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]],
     sub : (v1, v2) => [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]],
@@ -180,7 +184,6 @@ let vec = {
     norm : v => vec.div(v, vec.mag(v))
 };
 
-// draw new plot
 function plotFunction() {
     let verts = [];
     let norms = [];
@@ -193,7 +196,6 @@ function plotFunction() {
         return [ x / 10, f(xx, yy), y / 10 ];
     }
 
-    // calculate vaertices and norms
     for (let y = -250; y <= 250; y += 2) {
         for (let x = -250; x <= 250; x++) {
             let v1 = vert(x, y);
@@ -224,16 +226,13 @@ function plotFunction() {
         norms.push(...n);
     }
 
-    // destroy existing graphical graphPlotect
     if (graphPlot) {
         graphPlot.destroy();
     }
 
-    // create new graphical plot graphPlotect for drawing from vertices and norms
     graphPlot = new GraphicalPlot(new Float32Array(verts), new Float32Array(norms));
 }
 
-// draw whole plot and info
 function draw() {
     gl.useProgram(program);
     projectionMatrix = glMatrix4FromMatrix(createProjectionMatrix4(gl, ProjectionZNear, ProjectionZFar, ProjectionZoomY));
@@ -246,16 +245,29 @@ function draw() {
 
     graphPlot.draw();
 
-    //updateInfo();
 }
 
-// update info about funciton
 function updateParams() {
     let v = fInput.value;
     eval(`f = (x, y) => ${v};`);
     rangeX = [parseFloat(xMinInput.value),parseFloat(xMaxInput.value)];
     rangeY = [parseFloat(yMinInput.value),parseFloat(yMaxInput.value)];
+    if (radio1.checked) {
+        drawStyle = 1;
+    } else {
+        drawStyle = 0;
+    }
+    strength = parseFloat(ambientInput.value);
+    diffuse = diffuseToggle.checked;
     plotFunction();
+}
+
+function setDrawingToPOINTS() {
+    drawStyle = "POINTS";
+}
+
+function setDrawingStyleToTRIANGLE_STRIP(){
+    drawStyle = "TRIANGLE_STRIP";
 }
 
 let keyPressed = {up : false, down : false};
@@ -332,8 +344,6 @@ window.onkeydown = function(e) {
     draw();
 };
 
-
-// rotate from lecture
 window.onresize = function() {
     let wth = parseInt(window.innerWidth) - 100;
     let hth = parseInt(window.innerHeight) - 100;
@@ -387,7 +397,7 @@ let glVector3 = function(x, y, z) {
 };
 
 let glMatrix4 = function(xx, yx, zx, wx, xy, yy, zy, wy, xz, yz, zz, wz, xw, yw, zw, ww) {
-    // sequence of concatenated columns
+    
     return new Float32Array([ xx, xy, xz, xw, yx, yy, yz, yw, zx, zy, zz, zw, wx, wy, wz, ww ]);
 };
 
