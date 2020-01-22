@@ -1,0 +1,115 @@
+@font-face {
+  font-family: GS;
+  src: url("GrotesSansDemoRegular-Dzy0.otf"); }
+* {
+  box-sizing: border-box; }
+
+body {
+  background-image: url("xp1080.jpg");
+  background-repeat: repeat;
+  font-family: sans-serif;
+  color: black;
+  max-width: 1024px;
+  margin: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; }
+  @media only screen and (min-width: 1024px) {
+    body {
+      border-style: solid;
+      border-color: #1c1c1c;
+      border-bottom: hidden;
+      border-top: hidden; } }
+  body > * {
+    flex-shrink: 0; }
+
+nav {
+  width: 100%; }
+  nav > ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #1c1c1c;
+    flex-basis: 100%;
+    flex-wrap: wrap; }
+    @media only screen and (min-width: 800px) {
+      nav > ul {
+        flex-wrap: nowrap; } }
+    nav > ul > li {
+      width: 100%;
+      float: left; }
+      nav > ul > li a {
+        display: block;
+        text-align: center;
+        padding: 16px;
+        text-decoration: none;
+        color: #ffffff; }
+      nav > ul > li a:hover {
+        background-color: #323232; }
+
+#content {
+  background-color: cadetblue;
+  padding: 10px;
+  overflow: auto;
+  min-height: 100%;
+  flex-grow: 1; }
+
+@media only screen and (min-width: 800px) {
+  article {
+    width: auto; } }
+
+aside {
+  width: 100%; }
+  @media only screen and (min-width: 800px) {
+    aside {
+      width: auto;
+      float: left; } }
+  aside > img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto; }
+
+.personal_info {
+  font-family: GS, sans-serif;
+  width: auto;
+  padding: 18px; }
+
+.info_table {
+  border-spacing: 8px;
+  margin: 0 auto; }
+  @media only screen and (min-width: 800px) {
+    .info_table {
+      float: left; } }
+
+img {
+  object-fit: contain; }
+
+.interest {
+  overflow: auto; }
+  .interest > img {
+    max-width: 30%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto; }
+    @media only screen and (min-width: 800px) {
+      .interest > img {
+        float: left;
+        margin-right: 10px; } }
+
+.code_demo {
+  font-size: 8px;
+  line-height: 7px; }
+
+a.topLink {
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  appearance: button;
+  text-decoration: none;
+  color: initial;
+  position: fixed;
+  bottom: 0;
+  right: 0; }
+
+/*# sourceMappingURL=style-dev.css.map */

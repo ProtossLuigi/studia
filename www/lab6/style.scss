@@ -1,0 +1,168 @@
+$breakpoints: (
+        small: 580px,
+        medium: 800px,
+        large: 1024px,
+);
+
+$dark-gray: #1c1c1c;
+
+@mixin mq($canvas) {
+  @if map-has-key($breakpoints, $canvas) {
+    @media only screen and (min-width: map-get($breakpoints, $canvas)) {
+      @content;
+    }
+  }
+}
+
+@function zero() {
+  @return 0;
+}
+
+@font-face {
+  font-family: GS;
+  src: url("GrotesSansDemoRegular-Dzy0.otf");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-image: url("xp1080.jpg");
+  background-repeat: repeat;
+  font-family: sans-serif;
+  color: black;
+  max-width: 1024px;
+  margin: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  @include mq(large){
+    border-style: solid;
+    border-color: $dark-gray;
+    border-bottom: hidden;
+    border-top: hidden;
+  }
+
+  > * {
+    flex-shrink: zero();
+  }
+}
+
+nav {
+  width: 100%;
+
+  > ul {
+    display: flex;
+    list-style-type: none;
+    margin: zero();
+    padding: zero();
+    overflow: hidden;
+    background-color: $dark-gray;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+
+    @include mq(medium){
+      flex-wrap: nowrap;
+    }
+
+    > li {
+      width: 100%;
+      float: left;
+
+      a {
+        display: block;
+        text-align: center;
+        padding: 16px;
+        text-decoration: none;
+        color: #ffffff;
+      }
+
+      a:hover {
+        background-color: #323232;
+      }
+    }
+  }
+}
+
+#content {
+  background-color: cadetblue;
+  padding: 10px;
+  overflow: auto;
+  min-height: 100%;
+  flex-grow: 1;
+}
+
+article {
+  @include mq(medium){
+    width: auto;
+  }
+}
+
+aside {
+  width: 100%;
+
+  @include mq(medium){
+    width: auto;
+    float: left;
+  }
+
+  > img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.personal_info {
+  font-family: GS, sans-serif;
+  width: auto;
+  padding: 18px;
+}
+
+.info_table {
+  border-spacing: 8px;
+  margin: zero() auto;
+
+  @include mq(medium){
+    float: left;
+  }
+}
+
+img {
+  object-fit: contain;
+}
+
+.interest {
+  overflow: auto;
+
+  > img {
+    max-width: 30%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    @include mq(medium){
+      float: left;
+      margin-right: 10px;
+    }
+  }
+}
+
+.code_demo {
+  font-size: 8px;
+  line-height: 7px;
+}
+
+a.topLink {
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  appearance: button;
+
+  text-decoration: none;
+  color: initial;
+  position: fixed;
+  bottom: zero();
+  right: zero();
+}
