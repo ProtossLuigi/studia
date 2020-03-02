@@ -1,0 +1,50 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\title{Zadanie 3 lista 6}
+\author{Kajetan Bilski 244942}
+
+\begin{document}
+	\maketitle
+
+Mamy gramatykę:\\
+$S \to E$\\
+$E \to E \text{ or } T|T$\\
+$T \to T \text{ and } F|F$\\
+$F \to \text{not } F|(E)|\text{true}|\text{false}$\\
+Eliminacja lewostronnej rekurencji:\\
+$S \to E$\\
+$E \to TG$\\
+$G \to \text{or }TG|\varepsilon$\\
+$T \to FV$\\
+$V \to \text{and }FV|\varepsilon$\\
+$F \to \text{not } F|(E)|\text{true}|\text{false}$\\
+W powstałej gramatyce nie ma powtarzających się prefiksów prawych stron wyprowadzeń, więc nie ma jak ani po co wykonać lewostronnej faktoryzacji.\\
+$FIRST(S) = FIRST(E)$\\
+$FIRST(E) = FIRST(T)$\\
+$FIRST(G) = \{ \text{or},\varepsilon\} $\\
+$FIRST(T) = FIRST(F)$\\
+$FIRST(V) = \{ \text{and},\varepsilon\} $\\
+$FIRST(F) = \{ \text{not},( ,\text{true},\text{false}\} $\\
+$FOLLOW(S) = \{ \$ \} $\\
+$FOLLOW(E) = \{ \$ ,)\} $\\
+$FOLLOW(G) = FOLLOW(E)$\\
+$FOLLOW(T) = \{ \text{or},\$ ,) \} $\\
+$FOLLOW(V) = FOLLOW(T)$\\
+$FOLLOW(F) = \{ \text{and},\text{or},\$ ,) \} $\\
+Tablica przejść $LL(1)$:\\
+\begin{center}
+	\begin{tabular} {c | c | c | c | c | c | c | c | c}
+		& or & and & not & ( & ) & true & false & \$ \\ \hline
+		S & & & E & E & & E & E & \\ \hline
+		E & & & TG & TG & & TG & TG & \\ \hline
+		G & or TG & & & & $\varepsilon$ & & & $\varepsilon$ \\ \hline
+		T & & & FV & FV & & FV & FV & \\ \hline
+		V & $\varepsilon$ & and FV & & & $\varepsilon$ & & & $\varepsilon$ \\ \hline
+		F & & & not F & (E) & & true & false & \\
+	\end{tabular}
+\end{center}
+Da się stworzyć dla tej gramatyki tablicę przejść parsera typu $LL(1)$, co znaczy że jest ona typu $LL(1)$.
+\end{document}

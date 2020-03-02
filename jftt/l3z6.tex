@@ -1,0 +1,14 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{fullpage}
+\title{Zadanie 6 lista 3}
+\author{Kajetan Bilski 244942}
+
+\begin{document}
+	\maketitle
+
+Jeśli mamy język, w którego gramatyce występują tylko wyprowadzenia $A \to w$ i $A \to wB$, to możemy dla niego stworzyć automat nideterministyczny, gdzie dla każdego termianala $A$ mamy stan $q_A$ ($q_S$ jest stanem startowym) i dla każdego wyprowadzenia $A \to wB$ mamy dodatkowy zbiór stanów $q_{w_1},q_{w_2},...,q_{w_{n-1}}$ i przejścia $\delta (q_A,w_1) = q_{w_1}, \delta (q_{w_1},w_2) = q_{w_2}, ... ,\delta (q_{w_{n-2}},w_{n-1}) = q_{w_{n-1}},\delta (q_{w_{n-1}},w_n) = q_b$, gdzie $n = |w|$, a dla $A \to w$ mamy to samo z jedną różnicą $\delta (q_{w_{n-1}},w_n) = q_{ACC}$, gdzie $q_{ACC}$ jest stanem akceptującym. Istnieje automat bez stosu dla tego języka, więc ten język jest regularny.
+
+Jeśli mamy język regularny, to istnieje dla niego minimalny automat niedeterministyczny bez $\varepsilon$-przejść (jedynymi stanami bez przejść będą stany akceptujące). Wtedy możemy stworzyć gramatykę, gdzie każdy nieterminal $A$ odpowiada stanowi z $q_A$ dla którego istnieją przejścia. Wtedy dla każdego przejścia $\delta (q_A,a) = q_B$, dodajemy do gramatyki wyprowadzenie $A \to aB$ jeśli istnieją przejścia z $q_B$, a jeżeli $q_B$ jest stanem akceptującym (niezależnie, czy są z niego przejścia, czy nie), to dodajemy $A \to a$.
+\end{document}
