@@ -14,7 +14,7 @@ rodzic(X,Y) :-
 
 
 jest_matka(X) :-
-    matka(X,Y).
+    matka(X,_).
 jest_ojcem(X) :-
     ojciec(X,Y).
 jest_synem(X) :-
@@ -22,13 +22,13 @@ jest_synem(X) :-
     rodzic(Y,X).
 siostra(X,Y) :-
     kobieta(X),
-    X \= Y,
     rodzic(Z,X),
-    rodzic(Z,Y).
+    rodzic(Z,Y),
+    X \= Y.
 dziadek(X,Y) :-
     ojciec(X,Z),
     rodzic(Z,Y).
 rodzenstwo(X,Y) :-
-    X \= Y,
     rodzic(Z,X),
-    rodzic(Z,Y).
+    rodzic(Z,Y),
+    X \= Y.
