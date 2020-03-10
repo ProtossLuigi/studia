@@ -25,6 +25,12 @@ above(X,Y) :- directly_above(X,Y).
 above(X,Y) :-
     directly_above(X,Z),
     above(Z,Y).
+same_level_above(X,Y) :-
+    left_of(X,Y);
+    left_of(Y,X);
+    directly_above(X,A),
+    directly_above(Y,B),
+    same_level_below(A,B).
 same_level_below(X,Y) :-
     left_of(X,Y);
     left_of(Y,X);
@@ -34,12 +40,15 @@ same_level_below(X,Y) :-
 same_level(X,Y) :-
     left_of(X,Y);
     left_of(Y,X);
-    directly_above(X,A),
-    directly_above(Y,B),
-    same_level(A,B);
+    same_level_above(X,Y);
     same_level_below(X,Y).
+higher_no_re(X,Y,_) :- above(X,Y).
+higher_no_re(X,Y,L) :-
+    same_level(X,Z),
+    \+ member(Z,L),
+    higher_no_re(Z,Y,[Z|L]).
+higher_no_re(X,Y,_) :-
+    directly_above(X,Z),
+    (same_level(Z,Y);higher_no_re(Z,Y,[Z,Y])).
 higher(X,Y) :-
-    above(X,Y);
-    same_level(Y,A),
-    directly_above()
-    higher(X,A).
+    higher_no_re(X,Y,[X,Y]).
