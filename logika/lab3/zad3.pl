@@ -1,12 +1,7 @@
-permutation_num(L,L,[],R,R).
-permutation_num([X|L],[X|PL],D,TR,R) :-
-    length(D,LN),
-    NTR is TR + LN,
-    permutation_num(L,PL,D,NTR,R).
+remove_cycle(X) :-
+    X =:= 4,
+    !;
+    X < 5. 
 
-permutation_num([X|L],[Y|PL],D,TR,R) :-
-    select(Y,D,ND),
-    
-
-even_permutation(L,L).
-
+number_cycles(L,L,0) :- !.
+number_cycles([X|L],[X|PL],R) :- number_cycles(L,PL,R).
