@@ -1,0 +1,197 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{geometry}
+\geometry{left = 5pt, top = 5pt, right = 5pt, bottom = 5pt}
+\usepackage{booktabs}% http://ctan.org/pkg/booktabs
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+\begin{document}
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} włączanie & \textbf{Numer przypadku:} 1 & \textbf{Priorytet:} wysoki \\ \hline
+	\textbf{Główni aktorzy:} system, użytkownik & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:} szczegółowy, zasadniczy} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}.} \\
+	\multicolumn{3}{| l |}{Użytkownik uruchamia klimatyzację, która zaczyna regulować temperaturę pomieszczenia.} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb aktywny i zaczyna monitorować temperaturę.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{Klimatyzacja przechodzi w tryb aktywny i utrzymuje temperaturę odczytaną w momencie jej włączenia.} \\ \hline
+	\textbf{Wyzwalacz:} użytkownik & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System w trybie STANDBY.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{Użytkownik wciska przycisk ON/OFF na pilocie.} \\
+	\multicolumn{3}{| l |}{Pilot wysyła sygnał ON/OFF do jednostki głównej.} \\
+	\multicolumn{3}{| l |}{Jednostka główna odbiera sygnał ON/OFF.} \\
+	\multicolumn{3}{| l |}{System mierzy temperaturę powietrza i ustawia ją jako temperaturę docelową.} \\
+	\multicolumn{3}{| l |}{System wyświetla temperaturę docelową na wyświetlaczu na jednostce głównej.} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb KEEP.} \\
+	\multicolumn{3}{| l |}{System ustawia czas do następnego sprawdzenia temperatury na za minutę.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi alternatywne:}} \\
+	\multicolumn{3}{| l |}{Wyjątek 3: sygnał nie dociera do jednostki głównej - nic się nie dzieje.} \\ \hline
+\end{tabular}
+\\ \\ \\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} przejście w standby & \textbf{Numer przypadku:} 2 & \textbf{Priorytet:} wysoki \\ \hline
+	\textbf{Główni aktorzy:} system, użytkownik & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:} szczegółowy, zasadniczy} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{Użytkownik wyłącza wszystkie automatyczne funkcje systemu.} \\
+	\multicolumn{3}{| l |}{System czyści wszystkie zapamiętane dane i oczekuje na akcję użytkownika.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{System przechodzi w uśpienie i wstrzymuje wszystkie samobieżne czynności.} \\ \hline
+	\textbf{Wyzwalacz:} użytkownik & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System nie w trybie STANDBY.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{Użytkownik wciska przycisk ON/OFF na pilocie.} \\
+	\multicolumn{3}{| l |}{Pilot wysyła sygnał ON/OFF do jednostki głównej.} \\
+	\multicolumn{3}{| l |}{Jednostka główna odbiera sygnał ON/OFF.} \\
+	\multicolumn{3}{| l |}{W zależności od trybu w jakim w tym momencie jest system:} \\
+	\multicolumn{3}{| l |}{\tabitem jeśli w trybie KEEP to S1} \\
+	\multicolumn{3}{| l |}{\tabitem COOL: S2} \\
+	\multicolumn{3}{| l |}{\tabitem HEAT: S3} \\
+	\multicolumn{3}{| l |}{\tabitem DRY: S4} \\
+	\multicolumn{3}{| l |}{System czyści zapamiętane zmienne.} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb STANDBY.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi wewnętrzne:}} \\
+	\multicolumn{3}{| l |}{S1:} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{S2:} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza dmuchawę.} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{S3:} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza grzałkę.} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza dmuchawę.} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{S4:} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi alternatywne:}} \\
+	\multicolumn{3}{| l |}{Wyjątek 3: sygnał nie dociera do jednostki głównej - nic się nie dzieje.} \\ \hline
+\end{tabular}
+\\ \\ \\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} ustawienie temperatury & \textbf{Numer przypadku:} 3 & \textbf{Priorytet:} średni \\ \hline
+	\textbf{Główni aktorzy:} system, użytkownik & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:} szczegółowy, zasadniczy} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{Użytkownik dostosowuje temperaturę dawaną przez system.} \\
+	\multicolumn{3}{| l |}{System zmienia zapamiętaną docelową temperaturę i dostosowuje swoje zachowanie.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{Użytkownik zmienia docelową temperaturę o 1 stopień w góre bądź w dół.} \\ \hline
+	\textbf{Wyzwalacz:} użytkownik & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System w trybie KEEP, COOL lub HEAT.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{Użytkownik wciska przycisk + lub - na pilocie.} \\
+	\multicolumn{3}{| l |}{Pilot wysyła sygnał + lub - do jednostki głównej.} \\
+	\multicolumn{3}{| l |}{Jednostka główna odbiera sygnał.} \\
+	\multicolumn{3}{| l |}{System zmienia zapamiętaną temperaturę docelową o 1:} \\
+	\multicolumn{3}{| l |}{\tabitem w górę jeżeli +} \\
+	\multicolumn{3}{| l |}{\tabitem w dół jeżeli -} \\
+	\multicolumn{3}{| l |}{Jednostka główna wyświetla na wyświetlaczy nową temperaturę docelową.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi alternatywne:}} \\
+	\multicolumn{3}{| l |}{Wyjątek 3: sygnał nie dociera do jednostki głównej - nic się nie dzieje.} \\ \hline
+\end{tabular}
+\\ \\ \\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} włączenie osuszania & \textbf{Numer przypadku:} 4 & \textbf{Priorytet:} wysoki \\ \hline
+	\textbf{Główni aktorzy:} system, użytkownik & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:}} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{Użytkownik ustawia system, aby ten zaczął skupiać się na osuszaniu otoczenia.} \\
+	\multicolumn{3}{| l |}{System ustawia się w tryb osuszania.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{Klimatyzator ustawia się w tryb wyłącznego osuszania powietrza.} \\ \hline
+	\textbf{Wyzwalacz:} użytkownik & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System nie w trybie DRY.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{Użytkownik wciska przycisk DRY na pilocie.} \\
+	\multicolumn{3}{| l |}{Pilot wysyła sygnał DRY do jednostki głównej.} \\
+	\multicolumn{3}{| l |}{Jednostka główna odbiera sygnał DRY.} \\
+	\multicolumn{3}{| l |}{W zależności od trybu w jakim w tym momencie jest system:} \\
+	\multicolumn{3}{| l |}{\tabitem jeśli w trybie KEEP to S1} \\
+	\multicolumn{3}{| l |}{\tabitem COOL: S2} \\
+	\multicolumn{3}{| l |}{\tabitem HEAT: S3} \\
+	\multicolumn{3}{| l |}{\tabitem STANDBY: S4} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb DRY.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi wewnętrzne:}} \\
+	\multicolumn{3}{| l |}{S1:} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{\tabitem System czyści zapamiętaną temperaturę docelową.} \\
+	\multicolumn{3}{| l |}{\tabitem System włącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\
+	\multicolumn{3}{| l |}{S2:} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza dmuchawę.} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{\tabitem System czyści zapamiętaną temperaturę docelową.} \\
+	\multicolumn{3}{| l |}{S3:} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza grzałkę.} \\
+	\multicolumn{3}{| l |}{\tabitem System wyłącza dmuchawę.} \\
+	\multicolumn{3}{| l |}{\tabitem System zatrzymuje sprawdzanie temperatury i zegar do następnego sprawdzania.} \\
+	\multicolumn{3}{| l |}{\tabitem System czyści zapamiętaną temperaturę docelową.} \\
+	\multicolumn{3}{| l |}{\tabitem System włącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\
+	\multicolumn{3}{| l |}{S4:} \\
+	\multicolumn{3}{| l |}{\tabitem System włącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebiegi alternatywne:}} \\
+	\multicolumn{3}{| l |}{Wyjątek 3: sygnał nie dociera do jednostki głównej - nic się nie dzieje.} \\ \hline
+\end{tabular}
+\\\\\\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} ochładzanie & \textbf{Numer przypadku:} 5 & \textbf{Priorytet:} średni \\ \hline
+	\textbf{Główni aktorzy:} system & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:}} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{System zapamiętuje, że ochładzanie jest włączone.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{System zaczyna ochładzać powietrze.} \\ \hline
+	\textbf{Wyzwalacz:} temperatura powietrza & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System w trybie KEEP, COOL lub HEAT.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{W wyniku pomiary temperatury zostaje włączone ochładzanie.} \\
+	\multicolumn{3}{| l |}{Zależnie od obecnego trybu:} \\
+	\multicolumn{3}{| l |}{\tabitem COOL: nic się nie dzieje, system wraca do innych zadań} \\
+	\multicolumn{3}{| l |}{\tabitem KEEP: system włącza dmuchawę} \\
+	\multicolumn{3}{| l |}{\tabitem HEAT: system wyłącza grzałkę} \\
+	\multicolumn{3}{| l |}{System włącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej.} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb COOL.} \\ \hline
+\end{tabular}
+\\\\\\
+\\\\\\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} ogrzewanie & \textbf{Numer przypadku:} 6 & \textbf{Priorytet:} średni \\ \hline
+	\textbf{Główni aktorzy:} system & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:}} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{System zapamiętuje, że ogrzewanie jest włączone.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{System zaczyna ogrzewać powietrze.} \\ \hline
+	\textbf{Wyzwalacz:} temperatura powietrza & \multicolumn{2}{l |}{\textbf{Typ:} zewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System w trybie KEEP, COOL lub HEAT.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{W wyniku pomiary temperatury zostaje włączone ogrzewanie.} \\
+	\multicolumn{3}{| l |}{Zależnie od obecnego trybu:} \\
+	\multicolumn{3}{| l |}{\tabitem HEAT: nic się nie dzieje, system wraca do innych zadań} \\
+	\multicolumn{3}{| l |}{\tabitem KEEP: system włącza dmuchawę} \\
+	\multicolumn{3}{| l |}{\tabitem COOL: system wyłącza pompę chłodziwa, sprężarkę, rozprężarkę i wentylator jednostki zewnętrznej} \\
+	\multicolumn{3}{| l |}{System włącza grzałkę.} \\
+	\multicolumn{3}{| l |}{System przechodzi w tryb HEAT.} \\ \hline
+\end{tabular}
+\\\\\\
+\begin{tabular} {| l | l | l |}
+	\hline
+	\textbf{Nazwa przypadku użycia:} sprawdzenie temperatury & \textbf{Numer przypadku:} 7 & \textbf{Priorytet:} niski \\ \hline
+	\textbf{Główni aktorzy:} system & \multicolumn{2}{l |}{\textbf{Typ przypadku użycia:}} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Kto i co zyskuje:}} \\
+	\multicolumn{3}{| l |}{System aktualizuje zapamiętaną temperaturę powietrza i ustawia czas następnego pomiaru.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Krótki opis:}} \\
+	\multicolumn{3}{| l |}{System sprawdza temperaturę powietrza i opcjonalnie włącza ogrzewanie lub ochładzanie.} \\ \hline
+	\textbf{Wyzwalacz:} czas & \multicolumn{2}{l |}{\textbf{Typ:} wewnętrzny} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Stan początkowy:} System w trybie KEEP, COOL lub HEAT.} \\ \hline
+	\multicolumn{3}{| l |}{\textbf{Przebieg główny:}} \\
+	\multicolumn{3}{| l |}{Zegar systemowy uruchamia pomiar temperatury.} \\
+	\multicolumn{3}{| l |}{System mierzy temperaturę.} \\
+	\multicolumn{3}{| l |}{Jeśli zmierzona temperatura:} \\
+	\multicolumn{3}{| l |}{\tabitem > temperatury docelowej: system uruchamia ochładzanie} \\
+	\multicolumn{3}{| l |}{\tabitem < temperatury docelowej: system uruchamia ogrzewanie} \\
+	\multicolumn{3}{| l |}{\tabitem = temperaturze docelowej: system wyłączapompę chłodziwa, sprężarkę,} \\
+	\multicolumn{3}{| l |}{\tabitem rozprężarkę, wentylator jednostki zewnętrznej, grzałkę i dmuchawę i przechodzi w tryb KEEP.} \\
+	\multicolumn{3}{| l |}{System ustawia zegar który uruchomi następny pomiar za minutę.} \\ \hline
+\end{tabular}
+\end{document}

@@ -1,0 +1,13 @@
+% zadanie 3
+currentSpeed <- 0
+lastDistance <- getDistance()			% getDistance() zwraca dystans z radaru w cm
+loop:
+  currDistance <- getDistance()
+  relativeSpeed <- currDistance - lastDistance
+  targetSpeed <- (currDistance - 100) * k	% gdzie k jest magiczn¹ sta³¹ podobnie jak w prawie Hooke'a i decyduje o tym jak szybko chcemy ¿eby autko doje¿d¿a³o do docelowego po³o¿enia
+  currentSpeed <- currentSpeed + targetSpeed - relativeSpeed
+  if currentSpeed > 0:
+    setForwardSpeed(currentSpeed)		% setForwardSpeed(x) ustawia szybkoœæ autka na x cm/s
+  else:
+    setBackwardSpeed(-currentSpeed)
+  wait for 100 ms
