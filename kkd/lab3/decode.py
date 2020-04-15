@@ -119,11 +119,11 @@ def decoder_fib():
 
 
 def main(argv):
-    if len(sys.argv) >= 4 and argv[3] == '-gamma':
+    if len(argv) >= 4 and argv[3] == '-gamma':
         decoder = decoder_gamma()
-    elif len(sys.argv) >= 4 and argv[3] == '-delta':
+    elif len(argv) >= 4 and argv[3] == '-delta':
         decoder = decoder_delta()
-    elif len(sys.argv) >= 4 and argv[3] == '-fib':
+    elif len(argv) >= 4 and argv[3] == '-fib':
         decoder = decoder_fib()
     else:
         decoder = decoder_omega()

@@ -66,11 +66,11 @@ def encode_fib(num):
 
 
 def main(argv):
-    if len(sys.argv) >= 4 and argv[3] == '-gamma':
+    if len(argv) >= 4 and argv[3] == '-gamma':
         encoding_func = encode_gamma
-    elif len(sys.argv) >= 4 and argv[3] == '-delta':
+    elif len(argv) >= 4 and argv[3] == '-delta':
         encoding_func = encode_delta
-    elif len(sys.argv) >= 4 and argv[3] == '-fib':
+    elif len(argv) >= 4 and argv[3] == '-fib':
         encoding_func = encode_fib
     else:
         encoding_func = encode_omega
@@ -126,6 +126,7 @@ def main(argv):
     out_file.close()
     print('długość pliku wejściowego: ', total_in_count)
     print('długość pliku wyjściowego: ', total_out_count)
+    print('stopień kompresji: ', total_in_count/total_out_count)
     in_entropy = -sum(count/total_in_count * log(count/total_in_count, 256) for count in in_count if count > 0)
     out_entropy = -sum(count/total_out_count * log(count/total_out_count, 256) for count in out_count if count > 0)
     print('entropia pliku wejściowego: ', in_entropy)
