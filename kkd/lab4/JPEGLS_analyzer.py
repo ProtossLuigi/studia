@@ -111,16 +111,37 @@ def main(argv):
                     out_color_counts[key][i][color] += 1
                     new_pixel = new_pixel * 256 + color
                 out_pixel_counts[key][new_pixel] += 1
-    print('Entropia')
-    print('plik wejściowy:', entropy(pixel_count, in_pixel_counts))
-    print('plik wejściowy czerwony:', entropy(pixel_count, in_color_counts[2]))
-    print('plik wejściowy zielony:', entropy(pixel_count, in_color_counts[1]))
-    print('plik wejściowy niebieski:', entropy(pixel_count, in_color_counts[0]))
+    results_pixels = {'plik wejściowy': entropy(pixel_count, in_pixel_counts)}
+    results_red = {'plik wejściowy': entropy(pixel_count, in_color_counts[2])}
+    results_green = {'plik wejściowy': entropy(pixel_count, in_color_counts[1])}
+    results_blue = {'plik wejściowy': entropy(pixel_count, in_color_counts[0])}
+    best_pixels = None
+    best_red = None
+    best_green = None
+    best_blue = None
     for key in standards.keys():
-        print(key, ':', entropy(pixel_count, out_pixel_counts[key]))
-        print(key, 'czerwony:', entropy(pixel_count, out_color_counts[key][2]))
-        print(key, 'zielony:', entropy(pixel_count, out_color_counts[key][1]))
-        print(key, 'niebieski:', entropy(pixel_count, out_color_counts[key][0]))
+        results_pixels[key] = entropy(pixel_count, out_pixel_counts[key])
+        if not best_pixels or results_pixels[key] < results_pixels[best_pixels]:
+            best_pixels = key
+        results_red[key] = entropy(pixel_count, out_color_counts[key][2])
+        if not best_red or results_red[key] < results_red[best_red]:
+            best_red = key
+        results_green[key] = entropy(pixel_count, out_color_counts[key][1])
+        if not best_green or results_green[key] < results_green[best_green]:
+            best_green = key
+        results_blue[key] = entropy(pixel_count, out_color_counts[key][0])
+        if not best_blue or results_blue[key] < results_blue[best_blue]:
+            best_blue = key
+    print('Entropia')
+    for key in results_pixels.keys():
+        print(key, ':', results_pixels[key])
+        print(key, 'czerwony:', results_red[key])
+        print(key, 'zielony:', results_green[key])
+        print(key, 'niebieski:', results_blue[key])
+    print('najlepsza metoda:', best_pixels)
+    print('najlepsza metoda (czerowny):', best_red)
+    print('najlepsza metoda (zielony):', best_green)
+    print('najlepsza metoda (niebieski):', best_blue)
 
 
 if __name__ == '__main__':
