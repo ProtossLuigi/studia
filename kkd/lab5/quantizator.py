@@ -107,7 +107,7 @@ def create_codebook(bitmap, no_colors):
         for color in codebook:
             new_codebook.append(offset_vec(color, EPS))
             new_codebook.append(offset_vec(color, -EPS))
-        #print(new_codebook)
+        # print(new_codebook)
         delta = inf
         while delta > EPS:
             dists = [norms(color, bitmap) for color in new_codebook]
@@ -128,7 +128,7 @@ def create_codebook(bitmap, no_colors):
             new_avg_norm = sum(min_dists) / len(groups)
             delta = (avg_norm - new_avg_norm) / avg_norm
             avg_norm = new_avg_norm
-        #print(new_codebook)
+        # print(new_codebook)
         codebook = new_codebook
     return codebook
 
