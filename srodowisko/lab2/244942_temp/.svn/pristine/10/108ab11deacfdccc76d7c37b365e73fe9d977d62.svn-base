@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html id="htmlId"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body>
+    <p id="infor"></p>
+    <canvas id="canvasGL" width="1353" height="1356"></canvas>
+    <canvas id="canvasTex" width="512" height="512" style="display: none;"></canvas>
+    <script src="skybox_utils.js"></script>
+    <script src="cube-demo.js"></script>
+</body></html>

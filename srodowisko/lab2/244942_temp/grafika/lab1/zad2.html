@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>krzywa Hilberta</title>
+</head>
+<body>
+<canvas id="mainCanvas" width="1000" height="1000" style="border:1px solid #000000;max-width: 100vh;max-height: 100vh">no canvas for you</canvas>
+<form>
+    <input type="text" id="input">
+    <input type="button" name="rysuj" id="button">
+</form>
+<script type="module">
+    import Turtle from "./zolw.js";
+    let canvas = document.getElementById("mainCanvas");
+    let context = canvas.getContext("2d");
+    let turtle = new Turtle(canvas);
+
+    function drawPrep() {
+        let input = document.getElementById("input");
+        let num = parseInt(input.value);
+        input.value = "";
+        if (num !== null) {
+            turtle.ctx.clearRect(0,0,canvas.width,canvas.height);
+            turtle.ctx.beginPath();
+            turtle.x = 5;
+            turtle.y = 5;
+            turtle.angle = 90;
+            drawLeft(num,245/(Math.pow(2,num)-1));
+        }
+    }
+
+    function drawLeft(i,pix) {
+        if (i === 1) {
+            turtle.forward(pix);
+            turtle.right(90);
+            turtle.forward(pix);
+            turtle.right(90);
+            turtle.forward(pix);
+        } else {
+            turtle.right(90);
+            drawRight(i-1,pix);
+            turtle.right(90);
+            turtle.forward(pix);
+            drawLeft(i-1,pix);
+            turtle.left(90);
+            turtle.forward(pix);
+            turtle.left(90);
+            drawLeft(i-1,pix);
+            turtle.forward(pix);
+            turtle.right(90);
+            drawRight(i-1,pix);
+            turtle.right(90);
+        }
+    }
+
+    function drawRight(i,pix) {
+        if (i === 1) {
+            turtle.forward(pix);
+            turtle.left(90);
+            turtle.forward(pix);
+            turtle.left(90);
+            turtle.forward(pix);
+        } else {
+            turtle.left(90);
+            drawLeft(i-1,pix);
+            turtle.left(90);
+            turtle.forward(pix);
+            drawRight(i-1,pix);
+            turtle.right(90);
+            turtle.forward(pix);
+            turtle.right(90);
+            drawRight(i-1,pix);
+            turtle.forward(pix);
+            turtle.left(90);
+            drawLeft(i-1,pix);
+            turtle.left(90);
+        }
+    }
+
+    document.getElementById("button").addEventListener('click',drawPrep,false);
+</script>
+</body>
+</html>
