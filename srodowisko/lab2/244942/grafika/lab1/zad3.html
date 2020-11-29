@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>svg test</title>
+</head>
+<body>
+<svg id="mainSvg" width="1000" height="1000" style="border:1px solid #000000;max-width: 100vh;max-height: 100vh">no svg for you</svg>
+<form>
+    <input type="text" id="input">
+    <input type="button" name="rysuj" id="button">
+</form>
+<script>
+    let svg = document.getElementById("mainSvg");
+    let input = document.getElementById("input");
+    let horizontal;
+    let vertical;
+
+    function drawPrep() {
+        let num = parseInt(input.value);
+        input.value = "";
+        if (num !== null) {
+            horizontal = (svg.getBoundingClientRect().width - 10) / (Math.pow(2,num)-1);
+            vertical = (svg.getBoundingClientRect().height - 10) / (Math.pow(2,num)-1);
+            console.log(horizontal,vertical);
+            let out = "<polyline points=\"5,5";
+            out += recDraw(5,5,num,1,0);
+            out += "\" style=\"fill:none;stroke:black;stroke-width:2\" />"
+            svg.innerHTML = out;
+        }
+    }
+
+    function recDraw(x,y,i,d1,d2) {
+        let out = "";
+        if (i === 1) {
+            out += " " + (x + d2 * horizontal) + "," + (y + d1 * vertical);
+            out += " " + (x + (d1 + d2) * horizontal) + "," + (y + (d1 + d2) * vertical);
+            out += " " + (x + d1 * horizontal) + "," + (y + d2 * vertical);
+        } else {
+            out += recDraw(x,y,i-1,d2,d1);
+            let tempX = x + d2 * Math.pow(2,i-1) * horizontal;
+            let tempY = y + d1 * Math.pow(2,i-1) * vertical;
+            out += " " + tempX + "," + tempY;
+            out += recDraw(tempX,tempY,i-1,d1,d2);
+            tempX = tempX + d1 * Math.pow(2,i-1) * horizontal;
+            tempY = tempY + d2 * Math.pow(2,i-1) * vertical;
+            out += " " + tempX + "," + tempY;
+            out += recDraw(tempX,tempY,i-1,d1,d2);
+            tempX = tempX + (d1 * (Math.pow(2,i-1) - 1) - d2) * horizontal;
+            tempY = tempY + (d2 * (Math.pow(2,i-1) - 1) - d1) * vertical;
+            out += " " + tempX + "," + tempY;
+            out += recDraw(tempX,tempY,i-1,-d2,-d1);
+        }
+        return out;
+    }
+
+    document.getElementById("button").addEventListener('click',drawPrep,false);
+</script>
+</body>
+</html>

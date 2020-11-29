@@ -1,0 +1,23 @@
+Ten plik README utworzony, żeby studenci mogli umieszczać 
+tu opisy działania swoich podprogramów.
+
+
+Wywołanie programu:
+
+   program ARG
+
+Dla poszczególnych wartości ARG program działa następująco:
+
+         0 - wyświetla ogólny opis działania podprogramów;
+       999 - wczytuje liczbę i drukuje jej kwadrat.
+    250332 - wczytuje dwie liczby (int) i drukuje ich średnią arytmetyczną (float)
+    250134 - wczytuje liczbę całkowitą i drukuje informację o jej parzystości
+    250388 - wczytuje liczbe calkowita i drukuje jej szescian pomnozony przez 2
+
+
+Dodatkowo, po zreintegrowaniu swojej gałęzi do trunk-a student ma utworzyć 
+w katalogu: 
+
+^/app_1/tags
+
+własnego taga tej wersji o nazwie: v_<nr_indeksu>

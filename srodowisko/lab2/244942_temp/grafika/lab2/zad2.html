@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zad2</title>
+</head>
+<body>
+<canvas id="mainCanvas" width="1000" height="1000"></canvas>
+<ul>
+    <li><label for="id">id</label><input id="id" type="number" min="0"></li>
+    <li><label for="level">level</label><input id="level" type="number" min="1"></li>
+    <li><label for="x">x</label><input id="x" type="number" step="0.01"></li>
+    <li><label for="y">y</label><input id="y" type="number" step="0.01"></li>
+    <li><label for="z">z</label><input id="z" type="number" step="0.01" min="-1" max="1"></li>
+    <li><label for="color">color</label><input id="color" type="color"></li>
+    <li><input id="update" type="button" value="update"></li>
+    <li><input id="add" type="button" value="add"></li>
+    <li><input id="remove" type="button" value="remove"></li>
+</ul>
+<script id="vertexCode" type="notjs">
+    uniform vec3 offset;
+    attribute vec3 coordinates;
+    void main(void){
+        gl_Position = vec4(coordinates.x+offset.x,coordinates.y+offset.y,coordinates.z+offset.z,1.0);
+        gl_PointSize = 0.0;
+    }
+</script>
+<script id="fragCode" type="notjs">
+    uniform lowp vec3 color;
+    void main(void){
+        gl_FragColor = vec4(color,1.0);
+    }
+</script>
+<script>
+    let canvas = document.getElementById("mainCanvas");
+    let gl = canvas.getContext("webgl");
+    let idInput = document.getElementById("id");
+    let levelInput = document.getElementById("level");
+    let xInput = document.getElementById("x");
+    let yInput = document.getElementById("y");
+    let zInput = document.getElementById("z");
+    let colorInput = document.getElementById("color");
+    let updateInput = document.getElementById("update");
+    let addInput = document.getElementById("add");
+    let removeInput = document.getElementById("remove");
+    let coordLoc;
+    let offsetLoc;
+    let colorLoc;
+    let margin = 0.1;
+    let lineLength = 2.0 - 2*margin;
+    let vertices = [];
+    let curves = [];
+
+    function getCoordBuffer(n) {
+        let newBuffer = gl.createBuffer();
+        vertices = [margin-1.0,margin-1.0,0.0];
+        lineLength = (2.0-2*margin)/(Math.pow(2.0,n)-1.0);
+        recDraw(margin-1,margin-1,n,1,0);
+        gl.bindBuffer(gl.ARRAY_BUFFER,newBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER,null);
+        return {buffer: newBuffer, length: vertices.length/3};
+    }
+
+    function recDraw(x,y,i,d1,d2) {
+        if (i === 1) {
+            vertices.push(x + d2 * lineLength,y + d1 * lineLength,0.0);
+            vertices.push(x + (d1 + d2) * lineLength,y + (d1 + d2) * lineLength,0.0);
+            vertices.push(x + d1 * lineLength,y + d2 * lineLength,0.0);
+        } else {
+            recDraw(x,y,i-1,d2,d1);
+            let tempX = x + d2 * Math.pow(2,i-1) * lineLength;
+            let tempY = y + d1 * Math.pow(2,i-1) * lineLength;
+            vertices.push(tempX,tempY,0.0);
+            recDraw(tempX,tempY,i-1,d1,d2);
+            tempX = tempX + d1 * Math.pow(2,i-1) * lineLength;
+            tempY = tempY + d2 * Math.pow(2,i-1) * lineLength;
+            vertices.push(tempX,tempY,0.0);
+            recDraw(tempX,tempY,i-1,d1,d2);
+            tempX = tempX + (d1 * (Math.pow(2,i-1) - 1) - d2) * lineLength;
+            tempY = tempY + (d2 * (Math.pow(2,i-1) - 1) - d1) * lineLength;
+            vertices.push(tempX,tempY,0.0);
+            recDraw(tempX,tempY,i-1,-d2,-d1);
+        }
+    }
+
+    function createShader(type, source) {
+        let shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+            return shader;
+        }
+
+        console.error(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+    }
+
+    function createProgram(vertexShader, fragmentShader) {
+        let program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+            return program;
+        }
+
+        console.error(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+    }
+
+    function setup() {
+        let vSource = document.getElementById("vertexCode").text;
+        let fSource = document.getElementById("fragCode").text;
+        let vertexShader = createShader(gl.VERTEX_SHADER,vSource);
+        let fragmentShader = createShader(gl.FRAGMENT_SHADER,fSource);
+        let program = createProgram(vertexShader,fragmentShader);
+        gl.useProgram(program);
+        coordLoc = gl.getAttribLocation(program,"coordinates");
+        offsetLoc = gl.getUniformLocation(program,"offset");
+        colorLoc = gl.getUniformLocation(program,"color");
+        gl.enableVertexAttribArray(coordLoc);
+        gl.clearColor(0.0,0.0,0.0,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.viewport(0,0,canvas.width,canvas.height);
+    }
+
+    function draw() {
+        gl.clearColor(0.0,0.0,0.0,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        for (const c of curves){
+            //console.log(c.offset);
+            gl.uniform3fv(offsetLoc,c.offset);
+            gl.uniform3fv(colorLoc,c.color);
+            gl.bindBuffer(gl.ARRAY_BUFFER,c.coordBuffer);
+            gl.vertexAttribPointer(coordLoc,3,gl.FLOAT,false,0,0);
+            gl.drawArrays(gl.LINE_STRIP,0,c.length);
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER,null);
+    }
+
+    function hexToRgb(hex) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    function update(){
+        let index = parseInt(idInput.value);
+        idInput.value = "";
+        if (index >= 0 && index < curves.length){
+            let curve = curves[index];
+            let level = parseInt(levelInput.value);
+            if (!isNaN(level)){
+                let result = getCoordBuffer(level);
+                curve.coordBuffer = result.buffer;
+                curve.length = result.length;
+            }
+            let xoffset = isNaN(parseFloat(xInput.value)) ? curve.offset[0] : parseFloat(xInput.value);
+            let yoffset = isNaN(parseFloat(yInput.value)) ? curve.offset[1] : parseFloat(yInput.value);
+            let zoffset = isNaN(parseFloat(zInput.value)) ? curve.offset[2] : parseFloat(zInput.value);
+            curve.offset = [xoffset,yoffset,zoffset];
+            let rgb = hexToRgb(colorInput.value);
+            curve.color = [rgb.r/255.0,rgb.g/255.0,rgb.b/255.0];
+        }
+        levelInput.value = "";
+        xInput.value = "";
+        yInput.value = "";
+        zInput.value = "";
+        colorInput.value = "#ffffff";
+        draw();
+    }
+
+    function add(){
+        let newCurve = {};
+        //console.log(levelInput.value);
+        let level = isNaN(parseInt(levelInput.value)) ? 1 : parseInt(levelInput.value);
+        let result = getCoordBuffer(level);
+        newCurve.coordBuffer = result.buffer;
+        newCurve.length = result.length;
+        let xoffset = isNaN(parseFloat(xInput.value)) ? 0.0 : parseFloat(xInput.value);
+        let yoffset = isNaN(parseFloat(yInput.value)) ? 0.0 : parseFloat(yInput.value);
+        let zoffset = isNaN(parseFloat(zInput.value)) ? 0.0 : parseFloat(zInput.value);
+        newCurve.offset = [xoffset,yoffset,zoffset];
+        let rgb = hexToRgb(colorInput.value);
+        newCurve.color = [rgb.r/255.0,rgb.g/255.0,rgb.b/255.0];
+        curves.push(newCurve);
+        levelInput.value = "";
+        xInput.value = "";
+        yInput.value = "";
+        zInput.value = "";
+        colorInput.value = "#ffffff";
+        draw();
+    }
+
+    function remove(){
+        let index = parseInt(idInput.value);
+        idInput.value = "";
+        if (index >= 0 && index < curves.length){
+           curves.splice(index,1);
+        }
+        draw();
+    }
+
+    window.onload = setup;
+    updateInput.onclick = update;
+    addInput.onclick = add;
+    removeInput.onclick = remove;
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zad1</title>
+</head>
+<body>
+<canvas id="mainCanvas" width="1000" height="1000"></canvas>
+<script id="vertexCode" type="notjs">
+    uniform float transform;
+    uniform float size;
+    attribute vec3 coordinates;
+    void main(void){
+        gl_Position = vec4(coordinates,transform);
+        gl_PointSize = size;
+    }
+</script>
+<script id="fragCode" type="notjs">
+    void main(void){
+        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    }
+</script>
+<script>
+    let canvas = document.getElementById("mainCanvas");
+    let gl = canvas.getContext("webgl");
+
+    function createShader(type, source) {
+        let shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+            return shader;
+        }
+
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+    }
+
+    function createProgram(vertexShader, fragmentShader) {
+        let program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.bindAttribLocation(program,1,"coordinates");
+        gl.linkProgram(program);
+        let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+            return program;
+        }
+
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+    }
+
+    function main() {
+        let vSource = document.getElementById("vertexCode").text;
+        let fSource = document.getElementById("fragCode").text;
+        let vertexShader = createShader(gl.VERTEX_SHADER,vSource);
+        let fragmentShader = createShader(gl.FRAGMENT_SHADER,fSource);
+        let program = createProgram(vertexShader,fragmentShader);
+        gl.useProgram(program);
+        let transform = gl.getUniformLocation(program,'transform');
+        let size = gl.getUniformLocation(program,'size');
+        gl.uniform1f(transform,1.0);
+        gl.uniform1f(size,0.0);
+
+        let vertices = [
+            0.5,0.5,0.0,
+            0.5,0.0,0.0,
+            -0.5,0.0,0.0,
+            -0.5,-0.5,0.0
+        ];
+
+        let vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(1);
+        gl.clearColor(0.0,0.0,0.0,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.viewport(0,0,canvas.width,canvas.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        for (let i = 0; i < numAttribs; ++i) {
+            const info = gl.getActiveAttrib(program, i);
+            console.log('name:', info.name, 'type:', info.type, 'size:', info.size);
+        }
+
+        const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        for (let i = 0; i < numUniforms; ++i) {
+            const info = gl.getActiveUniform(program, i);
+            console.log('name:', info.name, 'type:', info.type, 'size:', info.size);
+        }
+    }
+
+    window.onload = main;
+</script>
+</body>
+</html>

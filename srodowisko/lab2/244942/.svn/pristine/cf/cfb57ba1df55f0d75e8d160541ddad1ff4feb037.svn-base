@@ -1,0 +1,4 @@
+﻿  l1.cpp
+c:\users\kajetan\studia_repo\sygały\l1\l1\l1.cpp(62): warning C4244: "inicjowanie": konwersja z "double" do "uchar", możliwa utrata danych
+c:\users\kajetan\studia_repo\sygały\l1\l1\l1.cpp(63): warning C4244: "inicjowanie": konwersja z "double" do "uchar", możliwa utrata danych
+  l1.vcxproj -> C:\Users\Kajetan\studia_repo\sygały\l1\x64\Debug\l1.exe
