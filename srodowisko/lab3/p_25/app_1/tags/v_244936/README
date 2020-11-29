@@ -1,0 +1,51 @@
+Ten plik README utworzony, żeby studenci mogli umieszczać 
+tu opisy działania swoich podprogramów.
+
+
+Wywołanie programu:
+
+   program ARG
+
+Dla poszczególnych wartości ARG program działa następująco:
+
+         0 - wyświetla ogólny opis działania podprogramów;
+       999 - wczytuje liczbę i drukuje jej kwadrat.
+	250127 - wczytuje dwie liczby a,b i zwraca sumę ich kwadratów
+    250332 - wczytuje dwie liczby (int) i drukuje ich średnią arytmetyczną (float)
+    250134 - wczytuje liczbę całkowitą i drukuje informację o jej parzystości
+    250388 - wczytuje liczbe calkowita i drukuje jej szescian pomnozony przez 2
+    250342 - wczytuje liczbę całkowitą i drukuje dla niej wróżbę
+    250344 - prosty kalkulator
+    250347 - wczytuje liczbe calkowita i drukuje ja wraz z sasiednimi liczbami
+    244947 - wczytuje liczbe calkowita i drukuje ja w duzej czcionce
+    250339 - wczytuje liczbe calkowita i drukuje jej reszte z dzielenia przez 3
+    244748 - wczytuje liczbę całkowitą n i drukuje n-tą liczbę fibonacciego 
+    250335 - wczytuje liczbę naturalną i drukuje choinkę o tej wysokości
+    250337 - wczytuje liczbę całkowitą i drukuje liczbę do niej przeciwną
+    250138 - drukuje motywacyjny komunikat
+    250136 - wczytuje dwie liczby calkowite 'n' i 'k' oraz drukuje wspolczynnik dwumianowy 'n' po 'k'
+    250125 - wczytuje dwie liczby całkowite i drukuje ich iloczyn
+    243434 - wczytuje liczbę całkowitą i drukuje jej cyfrę jedności
+	244949 - wczytuje liczbę całkowitą i drukuje ją powiekszoną o 1
+    231236 - wczytuje trzy liczby całkowite i drukuje największą z nich
+    250135 - wczytuje liczbę calkowitą i sprawdza czy jest ona dodatnia czy ujemna
+    244931 - wczytuje dwie liczby naturalne i drukuje ich najmniejszy wspólny dzielnik
+    244936 - wczytuje bok kwadratu i podaje jego pole
+    245128 - wczytuje liczbę całkowitą i drukuje sume jej cyfr
+    244946 - wczytuje liczbę całkowitą i drukuje o 17 wiekszą
+    244930 - drukuje w terminalu wesołego Pikachu
+    244747 - wypisuje ważny komunikat
+    250131 - życzy miłego dnia użytkownikowi
+    236542 - program wczytuje liczbę i drukuje jej wartośćp pomnożoną razy 10
+    250130 - wczytuje liczbę całkowitą i drukuje jej cyfrę dziesiątek
+    250334 - wczytuje trzy liczby calkowite i sprawdza czy suma dwoch pierwszych jest rowna trzeciej
+    244745 - wczytuje liczbę naturalną i drukuje trojkat Pascala o tej wysokości
+	227537 - wczytuje liczbe(rok) i sprawdza czy jest to rok przestepny
+    250341 - wczytuje dwie liczby całkowite i drukuje ich iloczyn
+    250128 - wczytuje liczbę i wypisuje ją
+Dodatkowo, po zreintegrowaniu swojej gałęzi do trunk-a student ma utworzyć 
+w katalogu: 
+
+^/app_1/tags
+
+własnego taga tej wersji o nazwie: v_<nr_indeksu>
